@@ -5,7 +5,9 @@
       "Bash(pdftotext \"BDA week 7-12.pdf\" -)",
       "Bash(pdftotext -f 1 -l 5 \"BDA Week [7,14,16, Mids_SOL].pdf\" -)",
       "Bash(pdftotext -f 30 -l 30 \"BDA Week [7,14,16, Mids_SOL].pdf\" -)",
-      "Bash(pdftotext -f 60 -l 60 \"BDA Week [7,14,16, Mids_SOL].pdf\" -)"
+      "Bash(pdftotext -f 60 -l 60 \"BDA Week [7,14,16, Mids_SOL].pdf\" -)",
+      "Bash(# Check on pandoc install progress *)",
+      "Read(//opt/homebrew/bin/**)"
     ]
   }
 }

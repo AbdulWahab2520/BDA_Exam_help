@@ -408,9 +408,9 @@ def flow_formulation():
                   "y receives from itself (×½) and from a (×½). a receives from y (×½) and from m (×1). "
                   "m receives from a (×½). So:", "Body"))
     flow.append(display_eq(
-        r"r_y = \tfrac{r_y}{2} + \tfrac{r_a}{2}, \quad "
-        r"r_a = \tfrac{r_y}{2} + r_m, \quad "
-        r"r_m = \tfrac{r_a}{2}", fontsize=14))
+        r"r_y = \frac{r_y}{2} + \frac{r_a}{2}, \quad "
+        r"r_a = \frac{r_y}{2} + r_m, \quad "
+        r"r_m = \frac{r_a}{2}", fontsize=14))
     flow.append(P("Combined with r<sub>y</sub>+r<sub>a</sub>+r<sub>m</sub>=1, the unique solution is "
                   "r<sub>y</sub>=2/5, r<sub>a</sub>=2/5, r<sub>m</sub>=1/5. "
                   "Gaussian elimination handles this for 3 unknowns; for billions of pages we need a smarter method — "
@@ -431,7 +431,7 @@ def matrix_formulation():
     flow.append(section_bar("§ 4   MATRIX FORMULATION — STOCHASTIC ADJACENCY M", NAVY))
     flow.append(P("Define the <b>stochastic adjacency matrix</b> M of size N × N as:", "Body"))
     flow.append(display_eq(
-        r"M_{ji} \;=\; \begin{cases} 1/d_i & \text{if } i \to j \\ 0 & \text{otherwise} \end{cases}",
+        r"M_{ji} = \frac{1}{d_i} \;\;\mathrm{if}\;\; i \to j, \;\;\;\; M_{ji} = 0 \;\;\mathrm{otherwise}",
         fontsize=14))
     flow.append(P("<b>Read M<sub>ji</sub> as “column i, row j”</b>: it is the share of i's rank that flows to j. "
                   "Each <i>column</i> of M sums to 1 (because page i splits its outflow across "
@@ -601,7 +601,7 @@ def complete_algorithm():
                   "(average out-degree). Storing or multiplying the dense Google matrix A is infeasible — "
                   "but A = β·M + (1−β)/N · J<sub>N×N</sub> can be applied without ever forming A:", "Body"))
     flow.append(display_eq(
-        r"r^{new} \;=\; \beta \, M \cdot r^{old} \;+\; \tfrac{1-\beta}{N} \, \mathbf{1}_N", fontsize=16))
+        r"r^{new} \;=\; \beta \, M \cdot r^{old} \;+\; \frac{1-\beta}{N} \, \mathbf{1}_N", fontsize=16))
     flow.append(P("Step 1 multiplies the <i>sparse</i> M with r — cheap. Step 2 just adds a constant to every entry — also cheap.", "Body"))
     flow.append(P("<b>Handling dead-ends without removing them.</b> If M has dead-ends, β·M·r<sup>old</sup> sums to less than 1: "
                   "some mass S leaked. Re-inject the leak uniformly over all N pages:", "Body"))
@@ -616,16 +616,16 @@ def complete_algorithm():
     flow.append(callout(
         "ALGORITHM — Complete PageRank (slide form)",
         [
-            Paragraph("<b>Input:</b> Directed graph G (may contain spider traps and dead-ends), "
-                      "teleport parameter β.", "ExBody"),
-            Paragraph("<b>Output:</b> Rank vector r<sup>new</sup>.", "ExBody"),
-            Paragraph("1. Initialize r<sup>old</sup><sub>j</sub> = 1/N for all j.", "ExBody"),
-            Paragraph("2. Repeat until Σ<sub>j</sub> |r<sup>new</sup><sub>j</sub> − r<sup>old</sup><sub>j</sub>| &lt; ε:", "ExBody"),
-            Paragraph("&nbsp;&nbsp;&nbsp;&nbsp;a. For each j: r'<sup>new</sup><sub>j</sub> = Σ<sub>i→j</sub> β · r<sup>old</sup><sub>i</sub> / d<sub>i</sub>", "ExBody"),
-            Paragraph("&nbsp;&nbsp;&nbsp;&nbsp;b. S = Σ<sub>j</sub> r'<sup>new</sup><sub>j</sub>", "ExBody"),
-            Paragraph("&nbsp;&nbsp;&nbsp;&nbsp;c. For each j: r<sup>new</sup><sub>j</sub> = r'<sup>new</sup><sub>j</sub> + (1 − S)/N", "ExBody"),
-            Paragraph("&nbsp;&nbsp;&nbsp;&nbsp;d. r<sup>old</sup> ← r<sup>new</sup>.", "ExBody"),
-            Paragraph("3. Return r<sup>new</sup>.", "ExBody"),
+            P("<b>Input:</b> Directed graph G (may contain spider traps and dead-ends), "
+              "teleport parameter β.", "ExBody"),
+            P("<b>Output:</b> Rank vector r<sup>new</sup>.", "ExBody"),
+            P("1. Initialize r<sup>old</sup><sub>j</sub> = 1/N for all j.", "ExBody"),
+            P("2. Repeat until Σ<sub>j</sub> |r<sup>new</sup><sub>j</sub> − r<sup>old</sup><sub>j</sub>| &lt; ε:", "ExBody"),
+            P("&nbsp;&nbsp;&nbsp;&nbsp;a. For each j: r'<sup>new</sup><sub>j</sub> = Σ<sub>i→j</sub> β · r<sup>old</sup><sub>i</sub> / d<sub>i</sub>", "ExBody"),
+            P("&nbsp;&nbsp;&nbsp;&nbsp;b. S = Σ<sub>j</sub> r'<sup>new</sup><sub>j</sub>", "ExBody"),
+            P("&nbsp;&nbsp;&nbsp;&nbsp;c. For each j: r<sup>new</sup><sub>j</sub> = r'<sup>new</sup><sub>j</sub> + (1 − S)/N", "ExBody"),
+            P("&nbsp;&nbsp;&nbsp;&nbsp;d. r<sup>old</sup> ← r<sup>new</sup>.", "ExBody"),
+            P("3. Return r<sup>new</sup>.", "ExBody"),
         ],
         title_style=S["ExTitle"], body_style=S["ExBody"],
         bg=EX_BG, border=EX_GREEN))

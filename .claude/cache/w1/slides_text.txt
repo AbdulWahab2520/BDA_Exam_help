@@ -1,0 +1,663 @@
+         CS-404 Big Data Analytics
+
+Week 01 – Introduction to Big Data Analytics
+              (BIG PICTURE)
+
+
+              Dr. Syed Imran Ali
+                                        21/01/2026
+                               Contacts
+
+Dr. Syed Imran Ali:
+    – Assistant Professor, Department of Computing
+   mailto: imran.ali@seecs.edu.pk
+   Office: A-301 Faculty Block, SEECS.
+
+
+Course Web site:
+  Site: NUST LMS
+  Item: Big Data Analytics
+
+
+
+• Office time for students:
+    – Thursday & Friday 11:00 AM - 01:00 PM
+
+
+
+                              CS-895 Big Data Analytics
+                     Big Data Analytics
+
+
+• How does Netflix know what you will watch next?
+
+
+
+
+                    CS-895 Big Data Analytics
+                         Big Data Analytics
+
+• How does Netflix know what you will watch next!
+
+
+       • What you watch, pause, skip
+       • What millions of similar users watch
+       • Content features (genre, actors, duration)
+
+
+
+
+       • Massive user behavior data
+       • Distributed storage & processing
+       • Machine learning at scale
+
+
+
+
+                        CS-895 Big Data Analytics
+                      Big Data Analytics
+
+
+• How does Google Maps predict traffic?
+
+
+
+
+                     CS-895 Big Data Analytics
+                        Big Data Analytics
+
+
+• How does Google Maps predict traffic?
+
+       • Live GPS data from millions of phones
+       • Historical traffic patterns
+       • Real-time events (accidents, weather)
+
+
+
+
+       • Data arrives every second
+       • Routes updated in near real time
+       • Must handle failures gracefully
+
+
+
+
+                       CS-895 Big Data Analytics
+                          Big Data Analytics
+
+
+• How does X/Twitter/Instagram/Tiktok know what’s
+  trending right now?
+
+• Millions of posts per minute
+• Hashtags, keywords, mentions
+• User location and time
+
+
+
+
+• High velocity data streams
+• Sudden spikes (viral events)
+• Noise, spam, and bots
+
+
+
+                         CS-895 Big Data Analytics
+                      Big Data Analytics
+
+
+YouTube Content Moderation
+  • Flagging inappropriate videos at upload scale
+
+
+InDrive/Cream (ride-hailing surge pricing)
+  • Real-time demand-supply analytics
+
+
+Amazon (E-Comm. Recommendations)
+  • Clickstreams + purchases at scale
+
+
+
+                     CS-895 Big Data Analytics
+                    Big Data Analytics
+
+
+
+
+Will Excel / Traditional DBs be able to deal with it?
+
+
+
+
+                   CS-895 Big Data Analytics
+                 Why would Excel fails?
+
+
+
+• Memory limitations
+
+• Single-machine processing
+
+• No concurrency
+
+• No streaming
+
+• No fault tolerance
+
+
+
+
+                   CS-895 Big Data Analytics
+       Why would Traditional RDBMS fails?
+
+
+
+• Structured schema only
+
+• Vertical scaling
+
+• Batch-oriented processing
+
+• High write volume issues
+
+• Fault tolerance
+
+
+
+
+                     CS-895 Big Data Analytics
+           Why Traditional Systems Fail?
+
+
+
+• Single-machine processing
+
+
+
+• RDBMS scaling issues
+
+
+• ACID vs Scalability
+
+
+• Network & disk bottlenecks
+
+                  CS-895 Big Data Analytics
+         1. Single-Machine Processing?
+
+
+
+Limitations of one machine:
+
+      • CPU, RAM, and disk are finite
+
+
+      • Cannot hold TBs of data in memory
+
+
+      • Failure = total downtime
+
+
+
+                CS-895 Big Data Analytics
+                  2. RDBMS Scaling!!!
+
+
+
+Scaling
+             Description        Pros           Cons
+Type
+             Bigger             Easy to        Expensive,
+Vertical
+             CPU/RAM            upgrade        hits ceiling
+                                               Complex,
+             Add                Scales         needs
+Horizontal
+             machines           indefinitely   distributed
+                                               logic
+
+
+
+                   CS-895 Big Data Analytics
+                3. ACID vs Scalability
+
+
+
+• ACID guarantees: Atomicity, Consistency,
+  Isolation, Durability
+• High volume/ high velocity  hard to
+  maintain full ACID
+• Big Data Systems often sacrifice strict
+  consistency for speed and availability
+
+
+
+
+                 CS-895 Big Data Analytics
+          4. Network & Disk Bottlenecks
+
+
+Why network & disk matter:
+
+
+• Reading 1 TB from disk at 100 MB/s 
+  bottleneck
+• Moving data over network is slower than
+  computation
+• I/O dominates performance in Big Data
+
+
+
+
+                CS-895 Big Data Analytics
+                    What is Big Data?
+
+
+
+
+Big Data refers to datasets that are too large, too
+fast, or too complex for traditional data processing
+systems to capture, store, manage, or analyze
+efficiently.
+
+
+
+
+                   CS-895 Big Data Analytics
+                   What is Big Data?
+
+
+
+
+Big Data = Data that breaks traditional systems
+in volume, velocity, or variety, and requires
+new tools and approaches to generate value.
+
+
+
+
+                  CS-895 Big Data Analytics
+                    Characteristics of Big Data
+
+
+                        Five V’s of Spatial Big Data
+
+
+    Volume           Variety          Velocity         Veracity           Value
+
+
+                    Different forms     Analysis of
+                        of data       Streaming Data                    Information for
+                                                       Uncertainty of
+    Scale of Data                                                          Decision
+                                                          Data
+                     Diversity of         Speed                             Making
+                      sources
+
+
+
+
+1
+                         V1 = Volume
+
+
+• The amount of data is too large to store or
+  process on single machine
+
+• Single-machine processing fails → data
+  doesn’t fit in memory or disk
+• Example: 1 TB read at 100 MB/s takes ~2.8
+  hours
+
+• Netflix user activity, Twitter firehose, Bank
+  transaction logs
+
+
+                  CS-895 Big Data Analytics
+                       V2 = Velocity
+
+
+• The speed at which new data is generated and
+  must be processed.
+
+
+• ACID constraints + single server → cannot
+  process millions of events per second
+• Traditional DBs = batch-oriented, high
+
+
+
+• Ex. Google Maps traffic updates every second
+
+
+                 CS-895 Big Data Analytics
+                        V3 = Variety
+
+
+• Data comes in multiple forms: structured,
+  semi-structured, and unstructured
+
+• RDBMS expect structured data (tables +
+  schema)
+• Big Data sources: logs, images, videos, JSON,
+  sensor data
+
+• Ex. Tweets + hashtags + images + geolocation
+• Ex. Netflix watch history + ratings + metadata
+
+
+                 CS-895 Big Data Analytics
+                       V4 = Veracity
+
+
+
+• Data is often messy, incomplete, or uncertain
+
+
+• Single-machine or DB systems assume “clean”
+  data
+• Handling noise, duplicates, or missing values
+  at scale is difficult
+
+• Social media spam, Inaccurate GPS readings,
+  Sensor errors in IoT data
+
+
+                 CS-895 Big Data Analytics
+                         V5 = Value
+
+
+• The usefulness of data for decision-making
+
+
+• Collecting massive data is useless if it cannot
+  be processed and analyzed efficiently
+• Traditional systems fail to extract insights
+  quickly from huge, fast, or messy data
+
+• Netflix recommendations increasing
+  engagement
+• Fraud alerts preventing losses
+• Trend detectionCS-895
+                  for Big Data
+                        marketing
+                               Analytics campaigns
+                        Comparative Analysis
+
+          What it           Traditional
+   V                                          Example
+          Means             System Limitation
+                                                     Netflix 1 TB
+Volume Size too big         Single-machine fails
+                                                     logs
+                                                     Google Maps
+Velocity Too fast           Batch DB too slow
+                                                     traffic
+          Many data
+Variety                     RDBMS rigid schema Twitter posts
+          types
+                            Hard to clean &          Social media
+Veracity Messy / noisy
+                            process                  spam
+          Insights at                                Fraud
+Value                       Too slow / manual
+          scale                                      detection
+
+                         CS-895 Big Data Analytics
+                  Big Data Philosophy
+
+
+• Distributed Computing
+
+• Data Locality
+
+• Fault Tolerance
+
+• Commodity Hardware
+
+
+• Trade-offs: Consistency vs Scalability
+
+
+
+                    CS-895 Big Data Analytics
+                           At A Glance
+
+
+Principle                               Intuition
+Distributed       Many machines share the work → speed
+computing         + redundancy
+                  Move compute to data → reduce
+Data locality
+                  network overhead
+                  Expect failure → design for automatic
+Fault tolerance
+                  recovery
+Commodity         Cheap, replaceable → scale
+hardware          inexpensively
+                  Consistency vs scalability → prioritize
+Trade-offs
+                  what matters
+
+                   CS-895 Big Data Analytics
+            Big Data Engineering vs Analytics
+
+
+
+
+Big Data Engineering:                Big Data Analytics:
+• Build and maintain                 • Extract insights from
+  the infrastructure                   data
+• Collect, store, and                • Build models and
+  prepare data                         predictions
+• Ensure scalability,                • Support decision-
+  reliability, fault                   making
+  tolerance
+
+
+
+                  CS-895 Big Data Analytics
+                       Types of Analytics
+
+
+Type           Question                  Example
+                                         Daily active users, total
+Descriptive    What happened?
+                                         sales last month
+               Why did it                Drop in users due to
+Diagnostic
+               happen?                   feature change
+               What will
+Predictive                               Next month’s sales forecast
+               happen?
+                                         Suggest promotion
+               What should we
+Prescriptive                             strategies to maximize
+               do?
+                                         sales
+
+
+                      CS-895 Big Data Analytics
+               Simple Big Data Analytics Pipeline
+
+
+• Logs: Raw data generated by users, devices, or systems
+• Storage: Persist the data using distributed storage
+  (HDFS, S3)
+• Processing: Clean, filter, and aggregate the data
+  (Spark/Hadoop)
+• Feature Extraction: Convert raw data into meaningful
+  inputs for models
+• Model: Apply analytics or machine learning algorithms
+• Decision: Generate actionable insights or automate
+  responses
+
+                     CS-895 Big Data Analytics
+          Simple Big Data Analytics Pipeline (Netflix)
+
+
+
+• Logs: what you watched
+
+• Storage: data lake
+
+• Processing: compute watch frequency, genre stats
+
+• Features: user-genre vectors
+
+• Model: collaborative filtering
+
+• Decision: suggest next movie
+
+
+
+
+                       CS-895 Big Data Analytics
+                                       Course Goal
+
+• This course contributes to the development of the following
+capabilities:
+    1. To learn about basic concepts, technical challenges, and opportunities in
+      big data analytics (including the big picture).
+    2. To learn about common algorithmic and statistical techniques used to
+      perform big data analysis.
+    3. To learn and get hands-on experience analyzing large datasets using
+      Hadoop, Apache Spark, Python, and NoSQL.
+    4. To learn about different types of scenarios and applications in big data
+      analytics.
+
+
+                               CS-895 Big Data Analytics
+                 Course Contents (evolving)
+
+• Introduction to Big Data Analytics (Big Picture)
+
+Part 1
+• Big Data Analytics: Frequent Itemsets Mining
+• Big Data Analytics: Finding Similar Items
+• Big Data Analytics: Stream Data Processing
+• Big Data Analytics: Graph Processing
+• Big Data Analytics: Recommender Systems
+• Big Data Analytics: Dimensionality Reduction
+Part 2 …
+Part 3 …
+
+                      CS-895 Big Data Analytics
+               Course Contents (evolving)
+
+Part 1 …
+Part 2
+• Big Data Technology: Hadoop (Map-Reduce Model)
+• Big Data Technology: Apache Spark (in-memory analytics)
+• Big Data Technology: Apache Spark (ML Lib.)
+• Big Data Technology: NoSQL/Cassandra/MongoDB
+
+Part 3
+• Big Data Applications: Retrieval Augmented Generation
+• Big Data Applications: Text Analytics
+• Big Data Applications for Healthcare/Business
+
+
+                    CS-895 Big Data Analytics
+                           Teaching method
+
+
+• Classroom lectures
+• Hands-on sessions / Drill Lessons
+
+
+
+Text Book:
+
+1. Mining of Massive Datasets by Jure
+   Leskovec Anand Rajaraman and Jeffrey
+   Ullman.
+               (Part – I)
+
+    https://web.stanford.edu/class/cs246/
+
+
+                         CS-895 Big Data Analytics
+                              Teaching method
+
+Reference Books:
+
+• Data Science for Business: What you need to know about data
+  mining and data-analytic thinking by Provost, F., & Fawcett, T.
+
+• Big data analytics: from strategic planning to enterprise integration
+  with tools, techniques, NoSQL, and graph. Elsevier by Loshin, D.
+
+• Data Mining Concepts and Techniques - Jiawei han & Micheline
+  Kamber Harcourt.
+
+• Learning Spark: Lightning-Fast Data Analytics by Jules S. Damji,
+  Brooke Wenig, Tathagata Das, Denny Lee.
+
+
+                            CS-895 Big Data Analytics
+                           Teaching Material
+
+• Teacher slides (available on the Web site of the course):
+   – Including references to books and papers
+• Scientific papers and book chapters:
+   – To be published on the Web site of the course
+• Software:
+   – Python Data Ax
+   – Hadoop
+   – Hive
+   – Spark
+   – NoSQL systems
+   – PowerBI
+   – Tableu
+
+
+                          CS-895 Big Data Analytics
+                         Think!
+
+
+
+
+Who is generating most of the data?
+
+
+
+
+           CS-895 Big Data Analytics
+                 Who is generating most of the data?
+
+                                                            Smart device?
+                       Machine Generated                       (IoT)
+
+
+
+
+                                           Data generated by
+                                           machine is being
+                                           used to enable real-
+                                           time actions
+
+
+                                           Data Sensor, Devices
+
+
+
+
+                                           Example Fitness
+                                           Device, Health care
+
+Source: gemini
+                       Acknowledgement
+
+
+
+
+  Various contents in this presentation have been taken from
+different books, lecture notes and the web. These solely belong
+ to their owners, and are here used only for clarifying various
+                      educational concepts.
+
+         Any copyright infringement is not intended.
+

@@ -1,0 +1,924 @@
+             Week 02
+Distributed Association Rule Mining
+
+
+         Dr. Syed Imran Ali
+
+    CS-404 Big Data Analytics
+                         Road Map
+
+• Distributed Computation via
+  Map Reduce Framework
+
+• Association Rule Mining via
+  Apriori Algorithm
+
+
+• Distributed Association Rule Mining
+
+
+
+                  CS-404 Big Data Analytics
+Map Reduce Framework
+
+
+
+
+   CS-404 Big Data Analytics
+Map Reduce Framework
+
+
+
+
+   CS-404 Big Data Analytics
+      Map Stage
+
+
+
+
+CS-404 Big Data Analytics
+  Reduce Stage
+
+
+
+
+CS-404 Big Data Analytics
+Map Reduce Pseudo Code
+
+
+
+
+    CS-404 Big Data Analytics
+Map Reduce Framework
+
+
+
+
+   CS-404 Big Data Analytics
+Map Reduce Framework
+
+
+
+
+   CS-404 Big Data Analytics
+Parallel Processing
+
+
+
+
+ CS-404 Big Data Analytics
+Map Reduce Framework
+
+
+
+
+   CS-404 Big Data Analytics
+       Data Flow
+
+
+
+
+CS-404 Big Data Analytics
+         In Short
+
+
+
+
+CS-895 Big Data Analytics
+         Example
+
+
+
+
+CS-404 Big Data Analytics
+Example - Workflow
+
+
+
+
+  CS-404 Big Data Analytics
+Pictorial Workflow
+
+
+
+
+ CS-404 Big Data Analytics
+Mapper Function
+
+
+
+
+CS-404 Big Data Analytics
+Mapper Function - Explanation
+
+
+
+
+     CS-404 Big Data Analytics
+Reduce Function
+
+
+
+
+CS-404 Big Data Analytics
+Reduce Function - Explanation
+
+
+
+
+     CS-404 Big Data Analytics
+        Driver Code
+
+
+
+
+CS-404 Big Data Analytics
+                  Association Rule Mining
+Frequent Pattern. a pattern (a set of items, subsequences,
+substructures, etc.) that occurs frequently in a dataset
+
+Goal. Finding inherent regularities in data
+    What products were often purchased together? Juice and diapers?
+    What are the subsequent purchases after buying a PC?
+    What kinds of DNA are sensitive to this new drug?
+    Can we automatically classify Web documents
+
+Applications
+Basket data analysis, cross-marketing, catalog design, sale campaign
+analysis, Web log (click stream) analysis, and DNA sequence analysis.
+
+
+
+                          CS-404 Big Data Analytics
+                         Frequent Pattern
+Itemset. A set of one or more items
+    K-itemset X = {x1 ,···,xk }
+
+    (absolute) support, or, support count of X: Frequency or
+    occurrence of an itemset X
+    (relative) support, s, is the fraction of transactions that contains
+    X (i.e., the probability that a transaction contains X)
+
+An itemset X is frequent if X’s support is no less than a minsup
+threshold.
+
+
+
+
+                           CS-404 Big Data Analytics
+                       Association Rules
+
+Q. Find all the rules X → Y with minimum support and confidence
+threshold
+
+
+
+    Support, s, probability that a transaction contains X ∪Y
+    Confidence, c, conditional probability that a transaction having
+    X also contains Y
+
+
+
+
+                         CS-404 Big Data Analytics
+                  Association Rule Mining
+Q. How many itemsets are potentially to be generated in the worst
+case?
+    The number of frequent itemsets to be generated is sensitive to
+    the minsup threshold
+    When minsup is low, there exist potentially an exponential number
+    of frequent itemsets
+
+The worst case: MN where M: # distinct items, and N : max length of
+transactions
+
+
+
+
+                          CS-404 Big Data Analytics
+                   Association Rule Mining
+The downward closure property of frequent patterns
+    Any subset of a frequent itemset must be frequent
+    If {Juice, Diaper, Nuts} is frequent, so is {Juice, Diaper}
+    i.e., every transaction having {Juice, Diaper, Nuts} also contains
+    {Juice, Diaper}
+
+Apriori pruning principle
+If there is any itemset which is infrequent, its superset should not be
+generated/tested.
+
+
+
+
+                           CS-404 Big Data Analytics
+                        Apriori Method
+
+1 Initially, scan DB once to get frequent 1-itemset
+2 Generate length (k + 1) candidate itemsets from length k frequent
+  itemsets
+3 Test the candidates against DB
+4 Terminate when no frequent or candidate set can be generated
+
+
+
+
+                        CS-404 Big Data Analytics
+                          Apriori Algorithm
+
+C k : Candidate itemset of size k
+Lk : frequent itemset of size k
+L1 = frequent items;
+for (k = 1;Lk ! = φ;k + +) do begin
+      C k +1 = candidates generated from Lk ;
+      for each transaction t in database do
+             increment the count of all candidates in Ck +1 that are contained in t
+      Lk +1 = candidates in Ck +1 with min_support
+end
+         S
+return       k Lk ;
+
+
+
+
+                             CS-404 Big Data Analytics
+                          Candidate Generation
+
+     How to generate candidates?
+          S tep 1. self-joining Lk
+          Step 2. pruning
+Join Lk p with Lk q, as follows:
+     insert into C k +1
+     select {p.itemi }{1,···,k −1} ,p.itemk ,q.itemk
+     from Lk p,Lk q
+     where {p.itemi }{1,···,k−1} = {q.itemi }{1,···,k−1} and p.itemk < q.itemk
+
+
+
+
+                               CS-404 Big Data Analytics
+             Example: Apriori Algorithm
+
+Database
+                           Tid          Items
+                           10           A, C, D
+                           20           B, C, E
+                           30          A, B, C, E
+                           40             B, E
+
+Min. Supp = 2
+    1st scan
+
+                                                        Itemset
+   Itemset   sup
+                           Itemset          sup
+                                                         {A, B}
+     {A}      2
+                              {A}            2           {A, C}
+     {B}      3    ⇒          {B}            3
+                                                    ⇒    {A, E}
+     {C}      3               {C}            3           {B, C}
+     {D}      1
+     {E}      3                  {E}          3          {B, E}
+                                                         {C, E}
+                       CS-404 Big Data Analytics
+             Example: Apriori Algorithm
+
+Database
+                           Tid       Items
+                           10      A, C, D
+                           20      B, C, E
+                           30     A, B, C, E
+                           40        B, E
+
+Min. Supp = 2
+    2nd scan
+
+   Itemset   sup
+                           Itemset      sup
+    {A, B}    1
+    {A, C}    2             {A, C}       2             Itemset
+    {A, E}    1    ⇒        {B, C}       2
+                                                   ⇒
+    {B, C}    2                                        {B, C, E}
+                            {B, E}       3
+    {B, E}    3             {C, E}       2
+    {C, E}    2
+
+                       CS-404 Big Data Analytics
+           Example: Apriori Algorithm
+
+Database
+
+                       Tid         Items
+                       10      A, C, D
+                       20      B, C, E
+                       30     A, B, C, E
+                       40        B, E
+
+
+Min. Supp = = 2
+    3rd scan
+
+                       Itemset       sup
+                       {B, C, E}      2
+
+
+
+
+                   CS-404 Big Data Analytics
+                      Association Rules
+
+Once the frequent itemsets have been found, it is straightforward
+to generate strong association rules that satisfy:
+    minimum support
+    minimum confidence
+Relation between Support and Confidence
+                                              support_count(A ∪B )
+          Confidence(A ⇒ B ) = P (B |A ) =
+                                                support_count (A )
+
+
+    Support_count(A ∪B ) is the number of transactions containing the
+    itemsets A ∪B
+    Support_count(A) is the number of transactions containing the
+    itemset A.
+
+
+
+
+                        CS-404 Big Data Analytics
+                Example
+
+
+
+
+Min. Sup. = 2
+
+
+
+
+                CS-404 Big Data Analytics
+                Example
+
+
+
+
+Min. Sup. = 2
+
+
+
+
+                CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+                              Example
+
+
+
+
+•   {I1, I2, I3}  {I1, I2}, {I1, I3}, and {I2, I3} are frequent, so keep it.
+•   {I1, I2, I5}  Keep it as well
+•   {I1, I3, I5}  {I3, I5}? (remove it)
+•   {I2, I3, I4}  {I3, I4}? (remove it)
+•   {I2, I3, I5}  {I3, I5}? (remove it)
+•   {I2, I4, I5}  {I4, I5}? (remove it)
+
+                              CS-404 Big Data Analytics
+          Example
+
+
+
+
+Dataset
+
+
+
+
+          CS-404 Big Data Analytics
+            Example: Patterns to Rules
+
+   Suppose the frequent Itemset
+   L = {I1 ,I2 ,I5 }                              Transactional Database
+   Subsets of L are:
+   {I1,I2}, {I1,I5}, {I2,I5}, {I1},{I2}, {I5}                   TID    List of item IDS
+                                                                T100       I1 ,I2 ,I5
+   Association rules:                                           T200         I2 ,I4
+  I1 ∧I2 ⇒ I5 confidence = 2/ 4 = ?%                            T300         I2 ,I3
+  I1 ∧I5 ⇒ I2 confidence = 2/ 2 = ?%                            T400       I1 ,I2 ,I4
+  I2 ∧I5 ⇒ I1 confidence = 2/ 2 = ?%                            T500         I1 , I3
+  I1 ⇒ I 2 ∧I 5 confidence = 2/ 6 = ?%                          T600         I2 , I3
+                                                                T700         I1 ,I3
+  I2 ⇒ I1 ∧I5 confidence = 2/ 7 = ?%                            T800     I1 ,I2 ,I3 ,I5
+  I5 ⇒ I1 ∧I2 confidence = 2/ 2 = ?%                            T900       I1 ,I2 ,I3
+
+
+
+
+Question: If the minimum confidence = 70%, what are the strong rules?
+                                    CS-404 Big Data Analytics
+            Example: Patterns to Rules
+
+   Suppose the frequent Itemset
+   L = {I1 ,I2 ,I5 }                              Transactional Database
+   Subsets of L are:
+   {I1,I2}, {I1,I5}, {I2,I5}, {I1},{I2}, {I5}                   TID    List of item IDS
+
+   Association rules:                                           T100       I1 ,I2 ,I5
+                                                                T200         I2 ,I4
+   I1 ∧I2 ⇒ I5 confidence = 2/ 4 = 50%                          T300         I2 ,I3
+                                                                T400       I1 ,I2 ,I4
+   I1 ∧I5 ⇒ I2 confidence = 2/ 2 = 100%                                      I1 , I3
+                                                                T500
+   I2 ∧I5 ⇒ I1 confidence = 2/ 2 = 100%                         T600         I2 , I3
+                                                                T700         I1 ,I3
+   I1 ⇒ I 2 ∧I 5 confidence = 2/ 6 = 33%
+                                                                T800     I1 ,I2 ,I3 ,I5
+   I2 ⇒ I1 ∧I5 confidence = 2/ 7 = 29%                          T900       I1 ,I2 ,I3
+   I5 ⇒ I1 ∧I2 confidence = 2/ 2 = 100%
+
+
+Question: If the minimum confidence = 70%, what are the strong rules?
+                                    CS-404 Big Data Analytics
+             Week 03
+Distributed Association Rule Mining
+
+
+         Dr. Syed Imran Ali
+
+    CS-404 Big Data Analytics
+                          Roadmap
+
+• Recap!
+
+• Distributed Apriori
+
+• An improvement in Apriori memory
+  consumption
+
+• Yet another way of generating frequent
+  patterns
+
+
+                  CS-404 Big Data Analytics
+                Example - Apriori
+
+
+
+
+Min. Sup. = 2
+
+
+
+
+                    CS-404 Big Data Analytics
+                Example
+
+
+
+
+Min. Sup. = 2
+
+
+
+
+                CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+                              Example
+
+
+
+
+•   {I1, I2, I3}  {I1, I2}, {I1, I3}, and {I2, I3} are frequent, so keep it.
+•   {I1, I2, I5}  Keep it as well
+•   {I1, I3, I5}  {I3, I5}? (remove it)
+•   {I2, I3, I4}  {I3, I4}? (remove it)
+•   {I2, I3, I5}  {I3, I5}? (remove it)
+•   {I2, I4, I5}  {I4, I5}? (remove it)
+
+                              CS-404 Big Data Analytics
+          Example
+
+
+
+
+Dataset
+
+
+
+
+          CS-404 Big Data Analytics
+            Example: Patterns to Rules
+
+   Suppose the frequent Itemset
+   L = {I1 ,I2 ,I5 }                              Transactional Database
+   Subsets of L are:
+   {I1,I2}, {I1,I5}, {I2,I5}, {I1},{I2}, {I5}                   TID    List of item IDS
+                                                                T100       I1 ,I2 ,I5
+   Association rules:                                           T200         I2 ,I4
+  I1 ∧I2 ⇒ I5 confidence = 2/ 4 = ?%                            T300         I2 ,I3
+  I1 ∧I5 ⇒ I2 confidence = 2/ 2 = ?%                            T400       I1 ,I2 ,I4
+  I2 ∧I5 ⇒ I1 confidence = 2/ 2 = ?%                            T500         I1 , I3
+  I1 ⇒ I 2 ∧I 5 confidence = 2/ 6 = ?%                          T600         I2 , I3
+                                                                T700         I1 ,I3
+  I2 ⇒ I1 ∧I5 confidence = 2/ 7 = ?%                            T800     I1 ,I2 ,I3 ,I5
+  I5 ⇒ I1 ∧I2 confidence = 2/ 2 = ?%                            T900       I1 ,I2 ,I3
+
+
+
+
+Question: If the minimum confidence = 70%, what are the strong rules?
+                                    CS-404 Big Data Analytics
+            Example: Patterns to Rules
+
+   Suppose the frequent Itemset
+   L = {I1 ,I2 ,I5 }                              Transactional Database
+   Subsets of L are:
+   {I1,I2}, {I1,I5}, {I2,I5}, {I1},{I2}, {I5}                   TID    List of item IDS
+
+   Association rules:                                           T100       I1 ,I2 ,I5
+                                                                T200         I2 ,I4
+   I1 ∧I2 ⇒ I5 confidence = 2/ 4 = 50%                          T300         I2 ,I3
+                                                                T400       I1 ,I2 ,I4
+   I1 ∧I5 ⇒ I2 confidence = 2/ 2 = 100%                                      I1 , I3
+                                                                T500
+   I2 ∧I5 ⇒ I1 confidence = 2/ 2 = 100%                         T600         I2 , I3
+                                                                T700         I1 ,I3
+   I1 ⇒ I 2 ∧I 5 confidence = 2/ 6 = 33%
+                                                                T800     I1 ,I2 ,I3 ,I5
+   I2 ⇒ I1 ∧I5 confidence = 2/ 7 = 29%                          T900       I1 ,I2 ,I3
+   I5 ⇒ I1 ∧I2 confidence = 2/ 2 = 100%
+
+
+Question: If the minimum confidence = 70%, what are the strong rules?
+                                    CS-404 Big Data Analytics
+Improving Apriori (PCY)
+
+
+
+
+    CS-404 Big Data Analytics
+PCY-Algorithm
+
+
+
+
+CS-404 Big Data Analytics
+PCY-Algorithm
+
+
+
+
+CS-404 Big Data Analytics
+PCY-Algorithm
+
+
+
+
+CS-404 Big Data Analytics
+PCY-Algorithm
+
+
+
+
+CS-404 Big Data Analytics
+PCY-Algorithm
+
+
+
+
+CS-404 Big Data Analytics
+PCY-Algorithm
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+                    Example
+Support s = 3
+Items: milk(1), coke(2), bread(3), pepsi(4), juice(5)
+
+Transactions:
+T1 = {1, 2, 3}
+T2 = {1, 4, 5}
+T3 = {1, 3},
+T4 = {2, 5}
+T5 = {1, 3, 4}
+T6 = {1, 2, 3, 5}
+T7 = {2, 3, 5}
+T8 = {2, 3}
+                    CS-404 Big Data Analytics
+                Example
+
+Pass 1
+Step 1. Items count: counts how many
+times each item appears (s = 3)
+
+Result:
+1:         5
+2:         5
+3:         6
+4:         2
+5:         4
+
+(item 4 is below s}
+               CS-404 Big Data Analytics
+                Example
+
+Pass 1
+Step 2. Make hash table for bucket counts
+
+•   Create possible pairs of all items
+•   Hash each pair in hash table
+    (keep count only)
+      • Hashing rule: hashing a pair {i,j} to a
+         bucket k, where:
+            • k = hash(i,j) = (i+j) % 5
+
+
+
+               CS-404 Big Data Analytics
+               Example
+
+Pass 1
+
+2. Make hash table for bucket counts
+
+(1,4) and (2,3)  k=0
+(1,5) and (2,4)  k=1
+(2,5) and (3,4)  k=2
+(1,2) and (3,5)  k=3
+(1,3) and (4,5)  k=4
+
+
+
+               CS-404 Big Data Analytics
+                    Example
+Pass 1
+
+2. Make hash table for bucket counts
+
+T1 = {1, 2, 3}                                  |(1,2)3 (2,3)0 (1,3)4
+T2 = {1, 4, 5}
+T3 = {1, 3},
+T4 = {2, 5}
+T5 = {1, 3, 4}
+T6 = {1, 2, 3, 5}
+T7 = {2, 3, 5}
+T8 = {2, 3}
+                    CS-404 Big Data Analytics
+                         Example
+Pass 1
+
+2. Make hash table for bucket counts
+
+T1 = {1, 2, 3}                |(1,2)3 (2,3)0 (1,3)4
+T2 = {1, 4, 5}                |(1,4)0 (1,5)1 (4,5)4
+T3 = {1, 3},                  |(1,3)4
+T4 = {2, 5}                   |(2,5)2
+T5 = {1, 3, 4}                |(1,3)4 (3,4)2 (1,4)0
+T6 = {1, 2, 3, 5}             |(1,2)3 (1,3)4 (1,5)1
+                              |(2,3)0 (2,5)2 (3,5)3
+T7 = {2, 3, 5}                |(2,3)0 (2,5)2 (3,5)3
+T8 = {2, 3}                   |(2,3)0
+
+
+
+                        CS-404 Big Data Analytics
+                Example
+
+Pass 1 (after the completion)
+
+•   Hash table results
+     Bucket                  Count
+     0                       6
+     1                       2
+     2                       4
+     3                       4
+     4                       5
+               CS-404 Big Data Analytics
+                         Example
+Pass 1
+
+•       Hash table results
+
+    Bucket       Count            •      The only pairs hashed to
+                                         bucket 1 are (1,5) in t2
+    0            6
+                                         and (1,5) in t6  count 2
+    1            2
+    2            4                •      (1,5) in bucket 1 is not
+                                         frequent
+    3            4
+    4            5
+                         CS-404 Big Data Analytics
+                      Example
+Pass 2
+
+•   Frequent items are {1, 2, 3, 5} (by pass 1 item’s
+    count)
+
+•   Possible candidate pairs are: (1,2) (1,3) (1,5) (2,3)
+    (2,5) (3,5)
+
+•   (1,5) is discarded because bucket 1 is not frequent
+
+•   Surviving candidate pairs:
+                   (1,2) (1,3)(2,3) (2,5) (3,5)
+
+                     CS-404 Big Data Analytics
+                      Example
+Pass 2
+
+•   Surviving pairs: (1,2) (1,3)(2,3) (2,5) (3,5)
+•   Actual Count (via DB scan):
+      • (1,2)            2
+      • (1,3)            4
+      • (2,3)            4
+      • (2,5)            3
+      • (3,5)            2
+
+      •   -> (1,2) and (3,5) don’t exceed s
+
+      •   Result: frequent items are:
+             {1}, {2}, {3}, {5}, {1,3}, {2,3}, {2,5}
+                      CS-404 Big Data Analytics
+             Another Example
+
+
+
+
+ Dataset
+
+
+
+
+Minimum
+Support: 2
+
+                CS-404 Big Data Analytics
+         Example
+Tids   Item Pairs
+T1     (1,2), (1,5), (2,5)
+T2     (2,4)
+T3     (2,3)
+T4     (1,2), (1,4), (2,4)
+T5     (1, 3)
+T6     (2, 3)
+T7     (1, 3)
+T8     (1,2), (1,3), (1,5), (2,3), (2,5), (3,5)
+T9     (1,2),   (1,5), (2,5)
+        CS-404 Big Data Analytics
+Hash: h(x,y) = ((order of x) * 10 + (order of y)) mod 7
+ Buckets       Item Pairs                       Bucket count
+ 0             (1,4), (3,5)                                2
+ 1             (1,5), (1,5)                                2
+ 2             (2,3), (2,3), (2,3), (2,3)                  4
+ 3             (2,4), (2,4)                                2
+ 4             (2,5), (2,5)                                2
+ 5             (1,2), (1,2), (1,2), (1,2)                  4
+ 6             (1, 3), (1,3), (1,3), (1,3)                 4
+
+ Buckets: all frequent!
+ C2 = (1,4), (3,5), (1,5), (2,3), (2,4), (2,5), (1,2), (1,3)
+ L2 = (1,5), (2,3), (2,4), (2,5), (1,2), (1,3)
+                               CS-404 Big Data Analytics
+                Frequent Pattern - Growth
+
+• Adopts a divide and conquer strategy
+• Compress the database representing frequent items into a
+• frequent–pattern tree or FP-tree
+    •   Retains the itemset association information
+
+• Divide the compressed database into a set of conditional
+  databases, each associated with one frequent item
+
+• Mine each such databases separately
+
+
+
+
+                            CS-404 Big Data Analytics
+              FP-Growth Example
+•   The first scan of data is the same as Apriori
+•   Derive the set of frequent 1-itemsets
+•   Let min-sup=2
+•   Generate a set of ordered items
+
+
+
+
+                        CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+Example
+
+
+
+
+CS-404 Big Data Analytics
+                  FP-Growth In Short
+
+•   FP-growth transforms the problem of finding long
+    frequent patterns to searching for shorter ones
+    recursively and concatenating the suffix
+•   It uses the least frequent suffix offering a good
+    selectivity
+•   It reduces the search cost
+•   If the tree does not fit into main memory, partition the
+    database
+•   Efficient and scalable for mining both long and short
+    frequent patterns
+
+
+                      CS-404 Big Data Analytics
+                    Distributed ARM
+                                   TID             Items
+                                   T1              ABC
+•   Transactions: 12               T2              AB
+
+•   Min. Supp: 4                   T3              AC
+                                   T4              BC
+•   Partitions: 3                  T5              ABC
+                                   T6              ABD
+                                   T7              BCD
+Do It Yourself                     T8              ACD
+                                   T9              ABCD
+                                   T10             BC
+                                   T11             AB
+                                   T12             AC
+
+                       CS-404 Big Data Analytics
+

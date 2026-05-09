@@ -1,0 +1,1298 @@
+   CS-404 Big Data Analytics
+
+Week 04 – Finding Similar Items
+
+       Dr. Syed Imran Ali
+                                    Topics
+
+
+• Finding Similar Items
+    • Nearest Neighbor Search
+    • Approximate Nearest Neighbor Search
+         • Locality Sensitive Hashing
+              • Dealing with dimensional data
+              • Mechanics of the LSH algorithm
+         • Hierarchical Navigable Small World
+
+
+* J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+
+                                CS-404 Big Data Analytics
+                                    Google Lens
+
+
+
+
+                               CS-895 Big
+J. Leskovec, A. Rajaraman, J. Ullman:     Data of
+                                      Mining   Analytics
+                                                  Massive Datasets, http://www.mmds.org
+                       Nearest Neighbor
+
+• Instance based learning
+• Example: Nearest neighbor
+     – Keep the whole training dataset: {(x, y)}
+     – A query example (vector) q comes
+     – Find closest example(s) x*
+     – Predict y*
+• Works both for regression and classification
+     – Collaborative filtering is an example of k-NN classifier
+          • Find k most similar people to user x that have rated movie y
+          • Predict rating yx of x as an average of yk
+
+
+
+
+* J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+
+                                CS-404 Big Data Analytics
+                    1 – Nearest Neighbor
+
+• To make Nearest Neighbor work we need 4 things:
+  – Distance metric:
+     • Euclidean
+  – How many neighbors to look at?
+     • One
+  – Weighting function (optional):
+     • Unused
+  – How to fit with the local points?
+     • Just predict the same output as the nearest neighbor
+
+
+
+
+                         CS-404 Big Data Analytics
+                    k – Nearest Neighbor
+
+• Distance metric:
+   – Euclidean
+• How many neighbors to look at?
+   – k
+• Weighting function (optional):
+   – Unused
+• How to fit with the local points?
+   – Just predict the average output among k nearest neighbors
+
+
+
+
+                        CS-404 Big Data Analytics
+           How to find nearest neighbors?
+
+• Given: a set P of n points in Rd
+• Goal: Given a query point q
+   – NN: Find the nearest neighbor p of q in P
+   – Range search: Find one/all points in P within distance r from q
+
+
+
+
+                               p
+                  q
+
+
+
+                        CS-404 Big Data Analytics
+                    Algorithms for NN
+
+• Main memory:
+  – Linear scan
+  – Tree based:
+     • Quadtree
+     • kd-tree
+  – Hashing:
+     • Locality-Sensitive Hashing
+• Secondary storage:
+  – R-trees
+
+
+
+
+                     CS-404 Big Data Analytics
+                  A Common Metaphor
+
+• Many problems can be expressed as
+  finding “similar” sets:
+  – Find near-neighbors in high-dimensional
+    space
+• Examples:
+  – Pages with similar words
+    • For duplicate detection, classification by topic
+  – Customers who purchased similar
+    products
+    • Products with similar customer sets
+  – Images with similar features
+    • Users who visited   similar
+                   CS-895 Big         websites
+                              Data Analytics
+            Problem for Today’s Lecture
+
+ Given: High dimensional data points 𝒙𝟏 , 𝒙𝟐 , …
+   For example: Image is a long vector of pixel colors
+            1 2 1
+            0 2 1 → [1 2 1 0 2 1 0 1 0]
+            0 1 0
+ And some distance function 𝒅(𝒙𝟏 , 𝒙𝟐 )
+   Which quantifies the “distance” between 𝒙𝟏 and 𝒙𝟐
+ Goal: Find all pairs of data points (𝒙𝒊 , 𝒙𝒋 ) that are
+  within some distance threshold 𝒅 𝒙𝒊 , 𝒙𝒋 ≤ 𝒔
+ Note: Naïve solution would take 𝑶 𝑵𝟐 
+  where 𝑵 is the number of data points
+ MAGIC: This can be done in 𝑶 𝑵 !! How?
+                     CS-895 Big Data Analytics
+                   The Key Idea: LSH
+
+ LSH is really a family of related techniques
+ In general, one throws items into bucks using several
+  different “hash functions”
+ You examine only those pairs of items that share
+  a bucket for at least one of these hashings
+
+ Upside: Designed correctly, only a small fraction
+  of pairs are ever examined
+
+ Downside: There are false negative – pairs of
+  similar items that never get considered
+                    CS-895 Big Data Analytics
+                                    Topics
+
+
+• Finding Similar Items
+    • Nearest Neighbor Search
+    • Approximate Nearest Neighbor Search
+         • Locality Sensitive Hashing (SimHash)
+              • Dealing with dimensional data
+              • Mechanics of the LSH algorithm
+         • Hierarchical Navigable Small World
+
+
+* J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+
+                                CS-404 Big Data Analytics
+                                        Sim Hash
+
+• Want: similar hash codes for nearby points
+
+
+                                          y
+
+
+
+
+               z                                            x
+                               CS-895 Big Data Analytics        Example: Courtesy
+                       LSH: Sim Hash (Random Projections)       Professor Victor Lavrenko
+                                        Sim Hash
+
+• Want: similar hash codes for nearby points
+
+
+                                           y
+
+
+
+
+                              d                e
+
+                                  a
+                                  b
+                                       c
+
+
+
+               z                                           x
+                               CS-895 Big Data Analytics       Example: Courtesy
+                                                               Professor Victor Lavrenko
+                                        Sim Hash
+
+• Want: similar hash codes for nearby points
+• Generate random hyperplanes: h1
+
+                                           y
+
+
+
+
+                              d                e
+
+                                  a
+                                  b
+                                       c                   0
+                                                           1
+
+               z                                               x
+                               CS-895 Big Data Analytics           Example: Courtesy
+                                                                   Professor Victor Lavrenko
+                                        Sim Hash
+
+• Want: similar hash codes for nearby points
+• Generate random hyperplanes: h1, h2
+
+                                           y
+
+
+
+
+                                               e           0
+                              d
+                                                               1
+                                  a
+                                  b
+                                       c                           0
+                                                                   1
+
+               z                                                       x
+                               CS-895 Big Data Analytics                   Example: Courtesy
+                                                                           Professor Victor Lavrenko
+                                        Sim Hash
+
+• Want: similar hash codes for nearby points
+• Generate random hyperplanes: h1, h2, h3
+
+                                            y
+
+                                  0 1
+
+
+
+
+                                                e          0
+                              d
+                                                               1
+                                  a
+                                  b
+                                        c                          0
+                                                                   1
+
+               z                                                       x
+                               CS-895 Big Data Analytics                   Example: Courtesy
+                                                                           Professor Victor Lavrenko
+                                           Sim Hash
+
+•   Want: similar hash codes for nearby points
+•   Generate random hyperplanes: h1, h2, h3
+•   Hash-code for a: Hstep [aTh1 aTh2 aTh3 ] = 100
+•   a compared to b: similar to a           y
+•   a compared to d: FP, eliminate 1
+                                    0
+•   a compared to c: will miss it
+
+
+
+
+                                               e              0
+                                 d
+                                                                  1
+      A’s hash code           100 a
+                                     b
+                                          c                           0
+                                                                      1
+
+                z                                                         x
+                                  CS-895 Big Data Analytics                   Example: Courtesy
+                                                                              Professor Victor Lavrenko
+                                           Sim Hash
+                                                                                     Table 1
+•   Want: similar hash codes for nearby points
+•   Generate random hyperplanes: h1, h2, h3                                      ***
+•   Hash-code for a: Hstep [aTh1 aTh2 aTh3 ] = 100                               100      abd
+•   a compared to b: similar to a           y
+                                                                                 101
+•   a compared to d: FP, eliminate 1
+                                    0                                            110      c
+•   a compared to c: will miss it
+                                                                                 ***
+
+
+                                               e              0
+                                 d
+                                                                  1
+      A’s hash code           100 a
+                                     b
+                                          c                           0
+                                                                      1
+
+                z                                                         x
+                                  CS-895 Big Data Analytics                   Example: Courtesy
+                                                                              Professor Victor Lavrenko
+                                             Sim Hash
+                                                                           Table 2
+•   Want: similar hash codes for nearby points
+•   Generate random hyperplanes: h1, h2, h3                            ***
+•   Hash-code for a: Hstep [aTh1 aTh2 aTh3 ] = 011                     001      d
+•   a compared to b: will miss it           y
+                                                                       010      b
+•   a compared to d: will not visit
+•   a compared to c: similar to a                                      011      ace
+•   a compared to e: ?                                                 ***
+
+
+                                 d               e
+
+                                      a
+                                b
+                                            c
+
+
+
+                z                                               x
+                                    CS-895 Big Data Analytics       Example: Courtesy
+                                                                    Professor Victor Lavrenko
+                                             Sim Hash
+                                                                           Table 2
+•   Want: similar hash codes for nearby points
+•   Generate random hyperplanes: h1, h2, h3                            ***
+•   Hash-code for a: Hstep [aTh1 aTh2 aTh3 ] = 011                     001      d
+•   a compared to b: will miss it           y
+                                                                       010      b
+•   a compared to d: will not visit
+•   a compared to c: similar to a                                      011      ace
+•   a compared to e: FP                                                ***
+
+• REPEAT w times
+with different                   d               e
+hyperplanes…
+                                      a
+                                b
+                                            c
+
+
+
+                z                                               x
+                                    CS-895 Big Data Analytics       Example: Courtesy
+                                                                    Professor Victor Lavrenko
+   CS-404 Big Data Analytics
+
+Week 05 – Finding Similar Items
+
+       Dr. Syed Imran Ali
+                                    Topics
+
+
+• Finding Similar Items
+    • Nearest Neighbor Search
+    • Approximate Nearest Neighbor Search
+         • Locality Sensitive Hashing (MinHash)
+              • Dealing with dimensional data
+              • Mechanics of the LSH algorithm
+         • Hierarchical Navigable Small World
+
+
+* J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+
+                                CS-404 Big Data Analytics
+                3 Essential Steps for Similar Docs
+
+
+1.       Shingling: Convert documents to sets
+
+2.       Min-Hashing: Convert large sets to short
+         signatures, while preserving similarity
+
+3.       Locality-Sensitive Hashing: Focus on
+         pairs of signatures likely to be from
+         similar documents
+          Candidate pairs!
+
+
+                         CS-895 Big Data Analytics
+                      The Big Picture
+
+
+
+                                                          Candidate
+                                                          pairs:
+                                              Locality-
+Docu-                                                     those pairs
+                                              Sensitive
+ment                                                      of signatures
+                                              Hashing
+                                                          that we need
+                                                          to test for
+        The set               Signatures:                 similarity
+        of strings            short integer
+        of length k           vectors that
+        that appear           represent the
+        in the doc-           sets, and
+        ument                 reflect their
+                              similarity
+
+
+                  CS-895 Big Data Analytics
+                                      Shingling
+
+
+Docu-
+ment
+
+
+               The set
+               of strings
+               of length k
+               that appear
+               in the doc-
+               ument
+
+
+
+
+        Step 1: Shingling: Convert documents to sets
+
+                             CS-895 Big Data Analytics
+                      Define: Shingles
+
+ Step 1: Shingling: Convert documents to sets
+ A k-shingle (or k-gram) for a document is a
+ sequence of k tokens that appears in the doc
+   Tokens can be characters, words or something
+    else, depending on the application
+   Assume tokens = characters for examples
+
+ Benefits of shingles:
+  Documents that are intuitively similar will have many
+   shingles in common
+  Changing a word only affects k-shingles within distance k-1
+   from the word    CS-895 Big Data Analytics
+              Compressing Shingles
+
+ To compress long shingles, we can hash them
+  to (say) 4 bytes
+ Represent a document by the set of hash
+  values of its k-shingles
+  Idea: Two documents could (rarely) appear to have
+   shingles in common, when in fact only the hash-
+   values were shared
+ Example: k=2; document D1= abcab
+ Set of 2-shingles: S(D1) = {ab, bc, ca}
+ Hash the singles: h(D1) = {1, 5, 7}
+                  CS-895 Big Data Analytics
+         Similarity Metric for Documents
+
+ Document D1 is a set of its k-shingles C1=S(D1)
+ Equivalently, each document is a
+ 0/1 vector in the space of k-shingles
+   Each unique shingle is a dimension
+   Vectors are very sparse
+ A natural similarity measure is the
+ Jaccard similarity:
+    sim(D1, D2) = |C1C2|/|C1C2|
+                                               3 in intersection
+                                               8 in union
+                                               Jaccard similarity= 3/8
+                   CS-895 Big Data Analytics   Jaccard distance = 5/8
+                 Working Assumption
+
+ Documents that have lots of shingles in
+ common have similar text, even if the text
+ appears in different order
+
+ Caveat: You must pick k large enough, or most
+ documents will have most shingles
+   k = 5 is OK for short documents
+   k = 10 is better for long documents
+
+
+
+                   CS-895 Big Data Analytics
+            From Sets to Boolean Matrices
+
+ Rows = elements (shingles)
+ Columns = sets (documents)
+                                                                     Documents
+  1 in row e and column s if and only
+   if e is a member of s                                         1   1   1       0
+  Column similarity is the Jaccard                              1   1   0       1
+   similarity of the corresponding                               0   1   0       1
+
+                                                      Shingles
+   sets (rows with value 1)                                      0   0   0       1
+  Typical matrix is sparse!
+                                                                 1   0   0       1
+ Each document is a column:
+  Example: sim(C1 ,C2) = ?
+                                                                 1   1   1       0
+    Size of intersection = 3; size of union = 6,                1   0   1       0
+     Jaccard similarity = 3/6
+                          CS-895 Big Data Analytics
+            Outline: Finding Similar Columns
+
+
+ So far:
+   Documents  Sets of shingles
+   Represent sets as boolean vectors in a matrix
+
+ Next goal: Find similar columns while computing
+  small signatures
+   Similarity of columns == similarity of signatures
+
+ Warnings:
+   Comparing all pairs takes too much time: Job for LSH
+     These methods can produce false negatives, and even false
+      positives (if the optional check is not made)
+                       CS-895 Big Data Analytics
+                      The Big Picture
+
+
+
+                                                          Candidate
+                                                          pairs:
+                                              Locality-
+Docu-                                                     those pairs
+                                              Sensitive
+ment                                                      of signatures
+                                              Hashing
+                                                          that we need
+                                                          to test for
+        The set               Signatures:                 similarity
+        of strings            short integer
+        of length k           vectors that
+        that appear           represent the
+        in the doc-           sets, and
+        ument                 reflect their
+                              similarity
+
+
+                  CS-895 Big Data Analytics
+            Outline: Finding Similar Columns
+
+ So far:
+   Documents  Sets of shingles
+   Represent sets as boolean vectors in a matrix
+ Next goal: Find similar columns while
+  computing small signatures
+   Similarity of columns == similarity of signatures
+
+
+
+
+                    CS-895 Big Data Analytics
+                                 MinHashing
+
+
+
+Docu-
+ment
+
+
+                   The set               Signatures:
+                   of strings            short integer
+                   of length k           vectors that
+                   that appear           represent the
+                   in the doc-           sets, and
+                   ument                 reflect their
+                                         similarity
+
+
+
+   • Step 2: Minhashing: Convert large sets to short signatures,
+     while preserving similarity
+                           CS-895 Big Data Analytics
+          Hashing Columns (Signatures)
+
+ Key idea: “hash” each column C to a small
+ signature h(C), such that:
+   sim(C1, C2) is the same as the “similarity” of
+    signatures h(C1) and h(C2)
+
+ Goal: Find a hash function h(·) such that:
+   If sim(C1,C2) is high, then with high prob. h(C1) =
+    h(C2)
+   If sim(C1,C2) is low, then with high prob. h(C1) ≠ h(C2)
+
+ Idea: Hash docs into buckets. Expect that
+ “most” pairs of near duplicate docs hash into
+ the same bucket!    CS-895 Big Data Analytics
+                          Min-Hashing
+
+ Goal: Find a hash function h(·) such that:
+   if sim(C1,C2) is high, then with high prob. h(C1) = h(C2)
+   if sim(C1,C2) is low, then with high prob. h(C1) ≠ h(C2)
+
+ Clearly, the hash function depends on
+ the similarity metric:
+   Not all similarity metrics have a suitable
+    hash function
+ There is a suitable hash function for
+ the Jaccard similarity: It is called Min-Hashing
+                     CS-895 Big Data Analytics
+                      Min-Hashing
+
+ Imagine the rows of the boolean matrix
+ permuted under random permutation 
+
+
+
+ Define a minhash function h(C) = the
+ number of the first (in the permuted order)
+ row in which column C has value 1:
+         h (C) = min (C)
+
+                 CS-895 Big Data Analytics
+                        Min-Hashing
+
+ Apply, to all columns, several randomly chosen
+ permutations  to create a signature for each
+ column
+   Use several (e.g., 100) independent hash functions
+    (that is, permutations) to create a signature of a
+    column
+
+ Result is a signature matrix: Columns = sets,
+ Rows = minhash values for each permutation 
+
+                   CS-895 Big Data Analytics
+                Min-Hashing Example
+
+                     2nd element of the permutation
+                     is the first to map to a 1
+
+Permutation    Input matrix (Shingles x Documents)
+                                                                                             Signature matrix M
+
+2 4 3            1     0            1            0                                          2           1     2   1
+3    2 4         1     0            0            1                                          2           1     4   1
+7    1 7         0     1            0            1
+                                                                                            1           2     1   2
+6 3 2            0     1            0            1
+1    6 6         0     1            0            1                           4th element of the permutation
+                                                                             is the first to map to a 1
+5    7 1         1     0            1            0
+4 5 5            1     0            1CS-8950Big Data Analytics
+                      J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org           22
+                The Min-Hash Property                          0   0
+                                                               0   0
+ Given cols C1 and C2, rows may be                            1   1
+  classified as:
+                    C1     C2                                  0   0
+            A       1      1                                   0   1
+            B       1      0
+                                          Four Types of Rows
+            C       0      1                                   1   0
+            D       0      0
+   a = # rows of type A, etc.
+ Note: sim(C1, C2) = a/(a +b +c)
+ Then: Pr[h(C1) = h(C2)] = Sim(C1, C2)
+   Look down the cols C1 and C2 until we see a 1
+   If it’s a type-A row, then h(C1) = h(C2)
+    If a type-B or type-C row, then not
+                       CS-895 Big Data Analytics
+                 Similarity for Signatures
+
+ We know: Pr[h(C1) = h(C2)] = sim(C1, C2)
+ Now generalize to multiple hash functions
+
+ The similarity of two signatures is the
+ fraction of the hash functions in which they
+ agree
+
+ Note: the expected similarity of two
+ signatures equals the Jaccard similarity of the
+ columns or sets that the signatures represent
+  And longer the signatures, the smaller will be the
+   expected error CS-895 Big Data Analytics
+                           Min-Hashing Example
+
+
+Permutation    Input matrix (Shingles x Documents)
+                                                          Signature matrix M
+
+2 4 3            1     0     1      0                     2    1    2     1
+3    2 4         1     0     0      1                     2    1    4     1
+7    1 7         0     1     0      1
+                                                          1    2    1     2
+6 3 2            0     1     0      1
+1    6 6         0     1     0      1
+5    7 1         1     0     1      0
+4 5 5            1     0     1      0
+                              CS-895 Big Data Analytics
+             Min-Hashing Implementation
+
+
+• Suppose 1 billions rows
+
+• Hard to pick a random permutation of 1 billion
+
+
+• Representing a random permutation requires 1 billion
+
+
+  entries
+
+
+• Accessing rows in permuted order leads to thrashing
+
+                      CS-895 Big Data Analytics
+              Min-Hashing Implementation
+
+
+• A good approximation to permuting rows:
+   • Pick, say, 100 hash functions.
+   • For each column c and each hash function hi,
+      keep a “slot” M(i, c).
+
+
+• Intent: M(i, c) will become the smallest value of hi(r) for
+  which column c has 1 in row r.
+   • i.e., hi(r) gives order of rows for ith permutation.
+
+                        CS-895 Big Data Analytics
+              Min-Hashing Implementation
+Algorithms:
+for each row r do begin:
+ for each hash function hi do:
+    compute hi(r);
+ for each column c:
+   if c has 1 in row r:
+       for each hash function hi do:
+          if hi(r) is smaller than M(i,c) then:
+              M(i,c) := hi(r)
+end;
+                          CS-895 Big Data Analytics
+                          Min-Hashing Example 1
+
+                                                  Sign 1       Sign 2
+Rows    C1       C2
+                                                           ∞            ∞
+1          1        0
+                            h1(1) = 1
+2            0        1
+                            h2(1) = 3
+3            1        1
+4            1        0
+5            0        1
+
+
+
+h1(x) = x mod 5
+h2(x) = (2x + 1) mod 5
+
+
+
+
+                             CS-895 Big Data Analytics
+                          Min-Hashing Example 1
+
+                                                  Sign 1       Sign 2
+Rows    C1       C2
+                                                           ∞            ∞
+1          1        0
+                            h1(1) = 1                      1            ∞
+2            0        1
+                            h2(1) = 3                      3            ∞
+3            1        1
+4            1        0
+5            0        1
+
+
+
+h1(x) = x mod 5
+h2(x) = (2x + 1) mod 5
+
+
+
+
+                             CS-895 Big Data Analytics
+                          Min-Hashing Example 1
+
+                                                  Sign 1       Sign 2
+Rows    C1       C2
+                                                           ∞            ∞
+1            1        0
+                            h1(1) = 1                      1            ∞
+2          0        1
+                            h2(1) = 3                      3            ∞
+3            1        1
+                            h1(2) = 2                      1            2
+4            1        0
+                            h2(2) = 0                      3            0
+5            0        1
+
+
+
+h1(x) = x mod 5
+h2(x) = (2x + 1) mod 5
+
+
+
+
+                             CS-895 Big Data Analytics
+                          Min-Hashing Example 1
+
+                                                  Sign 1       Sign 2
+Rows    C1       C2
+                                                           ∞            ∞
+1            1        0
+                            h1(1) = 1                      1            ∞
+2            0        1
+                            h2(1) = 3                      3            ∞
+3            1        1
+                            h1(2) = 2                      1            2
+4            1        0
+                            h2(2) = 0                      3            0
+5            0        1
+                            h1(3) = 3                      1            2
+                            h2(3) = 2                      2            0
+h1(x) = x mod 5             h1(4) = 4                      1            2
+h2(x) = (2x + 1) mod 5      h2(4) = 4                      2            0
+                            h1(5) = 0                      1            0
+                            h2(5) = 1                      2            0
+
+
+                             CS-895 Big Data Analytics
+Min-Hashing Example 2
+
+
+
+
+              h1               h2
+
+
+
+
+   CS-895 Big Data Analytics
+Min-Hashing Example 2
+
+
+
+
+   CS-895 Big Data Analytics
+Min-Hashing Example 2
+
+
+
+
+   CS-895 Big Data Analytics
+Min-Hashing Example 2
+
+
+
+
+   CS-895 Big Data Analytics
+Min-Hashing Example 2
+
+
+
+
+   CS-895 Big Data Analytics
+Min-Hashing Example 2
+
+
+
+
+   CS-895 Big Data Analytics
+                   Min-Hashing Example 2
+
+Characteristics Matrix                                     Signature Matrix
+
+
+
+
+Jaccard Sim (S1, S4). = 2/3                        Sim (S1, S4). = 2/2
+
+Jaccard Sim (S1, S3). = 1/4                         Sim (S1, S3). = 1/2
+
+Jaccard Sim (S1, S2). = 0                           Sim (S1, S2). = 0/2
+                            CS-895 Big Data Analytics
+                 Locality Sensitive Hashing
+
+                                                            Candidate
+                                                            pairs:
+                                                Locality-
+Docu-                                                       those pairs
+                                                Sensitive
+ment                                                        of signatures
+                                                Hashing
+                                                            that we need
+                                                            to test for
+                The set         Signatures:                 similarity
+                of strings      short integer
+                of length k     vectors that
+                that appear     represent the
+                in the doc-     sets, and
+                ument           reflect their
+                                similarity
+
+ Step 3: Locality-Sensitive Hashing:
+ Focus on pairs of signatures likely to be from similar
+ documents              CS-895 Big Data Analytics
+                                              2   1   4   1
+        LSH: Overview
+                                              1   2   1   2
+                                              2   1   2   1
+
+ Goal: Find documents with Jaccard similarity at
+ least s (for some similarity threshold, e.g., s=0.8)
+
+ LSH – General idea: Use a function f(x,y) that
+ tells whether x and y is a candidate pair: a pair
+ of elements whose similarity must be evaluated
+
+ For Min-Hash matrices:
+   Hash columns of signature matrix M to many buckets
+   Each pair of documents that hashes into the
+    same bucket is a candidate pair
+                  CS-895 Big Data Analytics
+                                                2   1   4   1
+        LSH: Overview
+                                                1   2   1   2
+                                                2   1   2   1
+
+ Pick a similarity threshold s (0 < s < 1)
+
+ Columns x and y of M are a candidate pair if
+  their signatures agree on at least fraction s of
+  their rows:
+  M (i, x) = M (i, y) for at least frac. s values of i
+   We expect documents x and y to have the same
+    (Jaccard) similarity as their signatures
+
+
+                    CS-895 Big Data Analytics
+                                             2   1   4   1
+       LSH for Min-Hash
+                                             1   2   1   2
+                                             2   1   2   1
+ Big idea: Hash columns of
+ signature matrix M several times
+
+ Arrange that (only) similar columns are
+ likely to hash to the same bucket, with
+ high probability
+
+ Candidate pairs are those that hash to
+ the same bucket
+
+
+                 CS-895 Big Data Analytics
+                                               2   1    4      1
+          Partition M into b Bands
+                                               1   2    1      2
+                                               2   1    2      1
+
+
+
+
+                                                    r rows
+                                                   per band
+
+b bands
+
+
+
+
+                                                     One
+                                                   signature
+
+
+                   Signature matrix M
+                   CS-895 Big Data Analytics
+                Partition M into Bands
+
+ Divide matrix M into b bands of r rows
+
+ For each band, hash its portion of each
+ column to a hash table with k buckets
+   Make k as large as possible
+
+ Candidate column pairs are those that hash
+ to the same bucket for ≥ 1 band
+
+ Tune b and r to catch most similar pairs,
+ but few non-similar pairs
+                   CS-895 Big Data Analytics
+                      Hashing Bands
+
+                                                             Columns 2 and 6
+Buckets                                                      are probably identical
+                                                             (candidate pair)
+
+                                                      Columns 6 and 7 are
+                                                      surely different.
+
+  Matrix M
+
+
+
+
+                                                    r rows                      b bands
+
+
+
+
+                  CS-895 Big Data Analytics
+ J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+             Simplifying Assumption
+
+ There are enough buckets that columns are
+ unlikely to hash to the same bucket unless
+ they are identical in a particular band
+
+ Hereafter, we assume that “same bucket”
+ means “identical in that band”
+
+ Assumption needed only to simplify analysis,
+ not for correctness of algorithm
+
+
+                 CS-895 Big Data Analytics
+                                             2   1   4   1
+       Example of Bands
+                                             1   2   1   2
+                                             2   1   2   1
+Assume the following case:
+ Suppose 100,000 columns of M (100k docs)
+ Signatures of 100 integers (rows)
+ Therefore, signatures take 40Mb
+ Goal: Find pairs of documents that
+  are at least s = 0.8 similar
+
+ Choose b = 20 bands of r = 5 integers/band
+
+
+
+                 CS-895 Big Data Analytics
+                                                2   1   4   1
+         C1,C2 are 80% Similar
+                                                1   2   1   2
+                                                2   1   2   1
+ Find pairs of  s=0.8 similarity, set b=20, r=5
+ Assume: sim(C1, C2) = 0.8
+   Since sim(C1, C2)  s, we want C1, C2 to be a candidate
+    pair: We want them to hash to at least 1 common bucket
+    (at least one band is identical)
+ Probability C1, C2 identical in one particular
+  band: (0.8)5 = 0.328
+ Probability C1, C2 are not similar in all of the 20
+  bands: (1-0.328)20 = 0.00035
+   i.e., about 1/3000th of the 80%-similar column pairs
+    are false negatives (we miss them)
+   We would find 99.965% pairs of truly similar documents
+                    CS-895 Big Data Analytics
+                                                     2    1    4    1
+         C1,C2 are 30% Similar
+                                                     1    2    1    2
+                                                     2    1    2    1
+ Find pairs of  s=0.8 similarity, set b=20, r=5
+ Assume: sim(C1, C2) = 0.3
+   Since sim(C1, C2) < s we want C1, C2 to hash to NO
+    common buckets (all bands should be different)
+ Probability C1, C2 identical in one particular
+  band: (0.3)5 = 0.00243
+ Probability C1, C2 identical in at least 1 of 20
+  bands: 1 - (1 - 0.00243)20 = 0.0474
+   In other words, approximately 4.74% pairs of docs
+    with similarity 0.3% end up becoming candidate pairs
+     They are false positives since we will have to examine them
+      (they are candidate pairs) but then it will turn out their
+      similarity is below threshold s
+                       CS-895 Big Data Analytics
+                b bands, r rows/band
+
+ Columns C1 and C2 have similarity t
+ Pick any band (r rows)
+   Prob. that all rows in band equal = tr
+   Prob. that some row in band unequal = 1 - tr
+
+ Prob. that no band identical = (1 - tr)b
+
+ Prob. that at least 1 band identical =
+                 1 - (1 - tr)b
+
+
+                   CS-895 Big Data Analytics
+                                                2   1   4   1
+          LSH involves a Tradeoff
+                                                1   2   1   2
+                                                2   1   2   1
+
+ Pick:
+   The number of Min-Hashes (rows of M)
+   The number of bands b, and
+   The number of rows r per band
+    to balance false positives/negatives
+     Note, M=b*r
+
+ Example: If we had only 10 bands of 10
+  rows, the number of false positives would
+  go down, but the number of false negatives
+  would go up
+                    CS-895 Big Data Analytics
+         Analysis of LSH – What We Want
+
+
+
+
+                                                          Probability = 1
+                                                              if t > s
+
+
+
+
+                                 Similarity threshold s
+Probability
+                  No chance
+of sharing
+                   if t < s
+ a bucket
+
+
+
+
+              Similarity t =sim(C1, C2) of two sets
+
+
+                          CS-895 Big Data Analytics
+         What 1 Band of 1 Row Gives You
+
+
+
+
+Probability
+of sharing
+ a bucket                        Remember:
+                                 Minhasing: Probability
+                                 Of equal hash-values
+                                 = similarity
+
+
+              Similarity t =sim(C1, C2) of two sets
+
+
+                          CS-895 Big Data Analytics
+         What 1 Band of 1 Row Gives You
+
+
+
+
+Probability
+of sharing
+ a bucket
+
+
+
+                                                  s
+
+              Similarity t =sim(C1, C2) of two sets
+
+
+                          CS-895 Big Data Analytics
+         What 1 Band of 1 Row Gives You
+
+
+                                                 False
+                                                 Negatives
+
+
+
+
+Probability
+of sharing
+ a bucket
+
+
+                         False Positives
+                                                  s
+
+              Similarity t =sim(C1, C2) of two sets
+
+
+                          CS-895 Big Data Analytics
+       What b Bands of r Rows Gives You
+
+
+                                                      At least
+                                                                  No bands
+                                                      one band
+                                                                  identical
+                                                      identical
+
+
+
+Probability                                            1 - (1 -t r )b
+of sharing
+ a bucket
+
+
+                                                                  All rows
+                                                      Some row    of a band
+                                                      of a band   are equal
+              Similarity t=sim(C1, C2) of two sets    unequal
+
+
+                          CS-895 Big Data Analytics
+              Example: b = 20; r = 5
+
+ Similarity threshold s
+ Prob. that at least 1 band is identical:
+                 s       1-(1-sr)b
+                .2          .006
+                .3          .047
+                .4          .186
+                .5          .470
+                .6          .802
+                .7          .975
+                .8 CS-895 Big.9996
+                              Data Analytics
+                                      Picking r and b: The S-curve
+
+
+ Picking r and b to get the best S-curve
+   50 hash-functions (r=5, b=10)
+                                 1
+
+                                0.9
+
+
+
+
+       Prob. sharing a bucket
+                                0.8
+
+                                0.7
+
+                                0.6
+
+                                0.5
+
+                                0.4
+
+                                0.3
+
+                                0.2
+                                                                                                Blue area: False Negative rate
+                                0.1
+                                                                                                Green area: False Positive rate
+                                 0
+                                  0   0.1   0.2   0.3   0.4   0.5   0.6   0.7   0.8   0.9   1
+
+
+                                                          Similarity
+
+                                                         CS-895 Big Data Analytics
+                     LSH Summary
+
+ Tune M, b, r to get almost all pairs with
+  similar signatures, but eliminate most pairs
+  that do not have similar signatures
+ Check in main memory that candidate pairs
+  really do have similar signatures
+ Optional: In another pass through data,
+  check that the remaining candidate pairs
+  really represent similar documents
+
+                  CS-895 Big Data Analytics
+                    Summary: 3 Steps
+
+ Shingling: Convert documents to sets
+   We used hashing to assign each shingle an ID
+ Min-Hashing: Convert large sets to short
+  signatures, while preserving similarity
+   We used similarity preserving hashing to generate
+    signatures with property Pr[h(C1) = h(C2)] = sim(C1, C2)
+   We used hashing to get around generating random
+    permutations
+ Locality-Sensitive Hashing: Focus on pairs of
+  signatures likely to be from similar documents
+   We used hashing to find candidate pairs of similarity  s
+                     CS-895 Big Data Analytics
+

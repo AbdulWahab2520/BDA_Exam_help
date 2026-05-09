@@ -1,0 +1,792 @@
+   CS-404 Big Data Analytics
+
+Week 07 – Finding Similar Items
+           (HNSW)
+
+       Dr. Syed Imran Ali
+                          Topics
+
+
+• Finding Similar Items
+  • Nearest Neighbor Search
+  • Approximate Nearest Neighbor Search
+     • Locality Sensitive Hashing
+     • Hierarchical Navigable Small World
+
+
+
+
+                      CS-404 Big Data Analytics
+Hierarchical Navigable Small World
+
+
+
+
+       https://www.pinecone.io/learn/series/faiss/hnsw/
+
+
+
+        CS-404 Big Data Analytics
+                                   Skip List
+
+
+
+
+https://www.mongodb.com/resources/basics/hierarchical-navigable-small-world
+
+
+                      CS-404 Big Data Analytics
+               Skip List
+
+
+
+
+https://www.pinecone.io/learn/series/faiss/hnsw/
+
+
+
+ CS-404 Big Data Analytics
+Navigable Small World Graph
+
+
+
+
+     https://www.pinecone.io/learn/series/faiss/hnsw/
+
+
+
+      CS-404 Big Data Analytics
+High / Low Degree Vertices
+
+
+
+
+    https://www.pinecone.io/learn/series/faiss/hnsw/
+
+
+
+     CS-404 Big Data Analytics
+   Creating HNSW
+
+
+
+
+https://www.pinecone.io/learn/series/faiss/hnsw/
+
+
+
+ CS-404 Big Data Analytics
+ Creating HNSW
+
+
+
+
+CS-404 Big Data Analytics
+                      CS-404 Big Data Analytics
+
+           Week 07 – Recommendation Systems
+
+
+                              Dr. Syed Imran Ali
+
+
+Courtesy: Mining of Massive Datasets (Stanford University)
+                        Road Map
+
+
+• Basic Concepts: Recommender Systems
+• Content-based Rec Sys
+• Collaborative Rec Sys
+   • User-User Collaborative Systems
+   • Item-Item Collaborative Systems
+• Recommender Systems Evaluation
+ Customer X                                            Customer Y
+   Buys Metallica CD                                          Does search on Metallica
+   Buys Megadeth CD                                           Recommender system
+                                                                suggests Megadeth from
+                                                                data collected about
+                                                                customer X
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   3
+                                                                         Examples:
+
+
+
+
+Search             Recommendations
+
+
+
+
+         Items            Products, web sites,
+                          blogs, news items, …
+
+
+
+
+                 J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   4
+ Shelf space is a scarce commodity for
+ traditional retailers
+   Also: TV networks, movie theaters,…
+
+ Web enables near-zero-cost dissemination
+ of information about products
+   From scarcity to abundance
+
+ More choice necessitates better filters
+   Recommendation engines
+   How Into Thin Air made Touching the Void
+    a bestseller: http://www.wired.com/wired/archive/12.10/tail.html
+                J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   5
+                  Source: Chris Anderson (2004)
+
+J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   6
+ Editorial and hand curated
+   List of favorites
+   Lists of “essential” items
+
+ Simple aggregates
+   Top 10, Most Popular, Recent Uploads
+
+ Tailored to individual users
+   Amazon, Netflix, …
+
+
+              J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   7
+ X = set of Customers
+ S = set of Items
+
+ Utility function u: X × S  R
+  R = set of ratings
+  R is a totally ordered set
+  e.g., 0-5 stars, real number in [0,1]
+
+
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   8
+        Avatar                LOTR                    Matrix                        Pirates
+
+
+Alice
+         1                                            0.2
+Bob
+                           0.5                                                   0.3
+Carol   0.2                                                1
+David
+                                                                                 0.4
+
+           J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   9
+ (1) Gathering “known” ratings for matrix
+  How to collect the data in the utility matrix
+
+ (2) Extrapolate unknown ratings from the
+ known ones
+  Mainly interested in high unknown ratings
+    We are not interested in knowing what you don’t like
+     but what you like
+
+ (3) Evaluating extrapolation methods
+  How to measure success/performance of
+   recommendation methods
+              J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   10
+ Explicit
+   Ask people to rate items
+   Doesn’t work well in practice – people
+    can’t be bothered
+
+ Implicit
+   Learn ratings from user actions
+     E.g., purchase implies high rating
+   What about low ratings?
+
+
+               J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   11
+ Key problem: Utility matrix U is sparse
+   Most people have not rated most items
+   Cold start:
+     New items have no ratings
+     New users have no history
+
+ Three approaches to recommender systems:
+   1) Content-based
+   2) Collaborative     Today!
+   3) Latent factor based
+
+              J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   12
+                        Road Map
+
+
+• Basic Concepts: Recommender Systems
+• Content-based Rec Sys
+• Collaborative Rec Sys
+   • User-User Collaborative Systems
+   • Item-Item Collaborative Systems
+• Recommender Systems Evaluation
+ Main idea: Recommend items to customer x
+ similar to previous items rated highly by x
+
+Example:
+ Movie recommendations
+  Recommend movies with same actor(s),
+   director, genre, …
+ Websites, blogs, news
+  Recommend other sites with “similar” content
+
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   15
+                                                                            Item profiles
+                                     likes
+
+
+
+
+                                                                                                    build
+recommend
+
+
+                                       match                                         Red
+                                                                                   Circles
+                                                                                  Triangles
+
+                                                                              User profile
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org           16
+ For each item, create an item profile
+
+ Profile is a set (vector) of features
+   Movies: author, title, actor, director,…
+   Text: Set of “important” words in document
+
+ How to pick important features?
+   Usual heuristic from text mining is TF-IDF
+    (Term frequency * Inverse Doc Frequency)
+     Term … Feature
+     Document … Item
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   17
+fij = frequency of term (feature) i in doc (item) j
+                                                                                                     Note: we normalize TF
+                                                                                                     to discount for “longer”
+                                                                                                     documents
+
+ni = number of docs that mention term i
+N = total number of docs
+
+
+TF-IDF score: wij = TFij × IDFi
+Doc profile = set of words with highest TF-IDF
+ scores, together with their scores
+
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                        18
+                                                                                                                                        Note: TF is not
+                                                                                                                                        normalized in this
+                                                                                                                                        example
+1. Clean data / Preprocessing — Clean data
+   (standardise data) , Normalize data( all lower case) ,
+   lemmatize data ( all words to root words ).
+
+2. Tokenize words with frequency
+
+3. Find TF for words
+
+4. Find IDF for words
+
+5. Vectorize vocab
+
+
+  J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3      19
+Document 1: It is going to rain today.
+
+Document 2: Today I am not going outside.
+
+Document 3: I am going to watch the season premiere.
+
+
+
+
+  J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3   20
+Step 1: Clean data and Tokenize
+
+
+
+
+  J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3   21
+  Step 2: Find Term Frequency
+
+  Document 1: it is going to rain today
+
+
+
+
+Find it’s TF =
+(Number of repetitions of word in a document)
+                       /
+ (# of words in a document)
+
+
+
+
+    J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3   22
+Continue for rest of sentences
+
+
+
+
+  J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3   23
+Step 3: Find IDF
+
+Find IDF for documents (we do this for feature names only/ vocab
+words which have no stop words )
+
+
+
+IDF =
+Log[(Number of documents)
+              /
+(Number of documents
+containing the word)]
+
+
+
+
+  J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3   24
+Step 4: Build model i.e. stack all words next to each
+other
+                                          IDF Value and TF value of 3 documents.
+
+
+
+
+  J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3   25
+Step 5: Compare results
+
+
+                                         TF-IDF = TF * IDF
+
+
+
+
+ J. https://medium.com/analytics-vidhya/tf-idf-term-frequency-technique-easiest-explanation-for-text-classification-in-nlp-with-code-8ca3912e58c3   26
+ User profile possibilities:
+   Weighted average of rated item profiles
+   Variation: weight by difference from average
+    rating for item
+  …
+ Prediction heuristic:
+   Given user profile x and item profile i, estimate
+                                𝒙·𝒊
+    𝑢(𝒙, 𝒊) = cos(𝒙, 𝒊) =
+                                                        | 𝒙 |⋅| 𝒊 |
+
+
+
+
+              J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   27
+ +: No need for data on other users
+  No cold-start or sparsity problems
+ +: Able to recommend to users with
+  unique tastes
+ +: Able to recommend new & unpopular items
+  No first-rater problem
+ +: Able to provide explanations
+  Can provide explanations of recommended items by
+   listing content-features that caused an item to be
+   recommended
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   28
+ –: Finding the appropriate features is hard
+   E.g., images, movies, music
+ –: Recommendations for new users
+   How to build a user profile?
+ –: Overspecialization
+   Never recommends items outside user’s
+    content profile
+   People might have multiple interests
+   Unable to exploit quality judgments of other users
+
+
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   29
+                        Road Map
+
+
+• Basic Concepts: Recommender Systems
+• Content-based Rec Sys
+• Collaborative Rec Sys
+   • User-User Collaborative Systems
+   • Item-Item Collaborative Systems
+• Recommender Systems Evaluation
+ Consider user x
+
+ Find set N of other                                     x
+  users whose ratings
+  are “similar” to
+  x’s ratings                                                                                       N
+
+ Estimate x’s ratings
+  based on ratings
+  of users in N
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org       32
+                                                                                                rx = [*, _, _, *, ***]
+                                                                                                ry = [*, _, **, **, _]
+
+
+ Let rx be the vector of user x’s ratings
+ Jaccard similarity measure                                                                               rx, ry as sets:
+                                                                                                           rx = {1, 4, 5}
+   Problem: Ignores the value of the rating                                                               ry = {1, 3, 4}
+
+ Cosine similarity measure
+                                                          𝑟𝑥 ⋅𝑟𝑦                                        rx, ry as points:
+   sim(x, y) = cos(rx, ry) =                                                                           rx = {1, 0, 0, 1, 3}
+                                                    ||𝑟𝑥 ||⋅||𝑟𝑦 ||                                     ry = {1, 0, 2, 2, 0}
+
+   Problem: Treats missing ratings as “negative”
+ Pearson correlation coefficient
+   Sxy = items rated by both users x and y
+                         σ𝒔∈𝑺𝒙𝒚 𝒓𝒙𝒔 − 𝒓𝒙 𝒓𝒚𝒔 − 𝒓𝒚
+𝒔𝒊𝒎 𝒙, 𝒚 =
+                                                          𝟐                                            𝟐
+               σ𝒔∈𝑺𝒙𝒚 𝒓𝒙𝒔 − 𝒓𝒙                                     σ𝒔∈𝑺𝒙𝒚 𝒓𝒚𝒔 − 𝒓𝒚                           rx, ry … avg.
+               J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+                                                                                                             rating of x,
+                                                                                                                       33
+                                                                                                                          y
+                                                                               Cosine sim:                    σ𝒊 𝒓𝒙𝒊 ⋅ 𝒓𝒚𝒊
+                                                                                        𝒔𝒊𝒎(𝒙, 𝒚) =
+                                                                                                             σ𝒊 𝒓𝟐𝒙𝒊 ⋅ σ𝒊 𝒓𝟐𝒚𝒊
+
+
+
+
+ Intuitively we want: sim(A, B) > sim(A, C)
+ Jaccard similarity: 1/5 < 2/4
+ Cosine similarity: 0.386 > 0.322
+   Considers missing ratings as “negative”
+   Solution: subtract the (row) mean     sim A,B vs. A,C:
+                                                                                                 0.092 > -0.559
+                                                                                                     Notice cosine sim. is
+                                                                                                     correlation when
+                                                                                                     data is centered at 0
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                           34
+From similarity metric to recommendations:
+ Let rx be the vector of user x’s ratings
+ Let N be the set of k users most similar to x
+  who have rated item i
+ Prediction for item s of user x:
+         1
+   𝑟𝑥𝑖 = σ𝑦∈𝑁 𝑟𝑦𝑖
+         𝑘                                                  Shorthand:
+                                                            𝒔𝒙𝒚 = 𝒔𝒊𝒎 𝒙, 𝒚
+            σ𝑦∈𝑁 𝑠𝑥𝑦 ⋅𝑟𝑦𝑖
+   𝑟𝑥𝑖 =    σ𝑦∈𝑁 𝑠𝑥𝑦
+
+   Other options?
+ Many other tricks possible…
+                J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   35
+ So far: User-user collaborative filtering
+ Another view: Item-item
+   For item i, find other similar items
+   Estimate rating for item i based
+    on ratings for similar items
+   Can use same similarity metrics and
+    prediction functions as in user-user model
+
+  r 
+                         s  rxj
+           jN ( i ; x ) ij
+
+       
+   xi                                                   sij… similarity of items i and j
+                           s
+              jN ( i ; x ) ij                          rxj…rating of user u on item j
+                                                        N(i;x)… set items rated by x similar to i
+               J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   36
+                                                      users
+             1   2      3          4         5          6         7          8         9          10 11 12
+
+         1   1          3                               5                              5                       4
+
+         2              5          4                              4                               2            1   3
+
+
+movies
+         3   2   4                 1         2                    3                    4          3            5
+
+         4       2      4                    5                               4                                 2
+
+         5              4          3         4          2                                                      2   5
+
+         6   1          3                    3                               2                                 4
+
+
+                     - unknown rating                                    - rating between 1 to 5
+
+                       J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org           37
+                                                    users
+             1   2    3          4         5          6         7          8         9          10 11 12
+
+         1   1        3                      ?        5                              5                       4
+
+         2            5          4                              4                               2            1   3
+
+
+movies
+         3   2   4               1         2                    3                    4          3            5
+
+         4       2    4                    5                               4                                 2
+
+         5            4          3         4          2                                                      2   5
+
+         6   1        3                    3                               2                                 4
+
+
+                     - estimate rating of movie 1 by user 5
+
+                     J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org           38
+                                                      users
+             1     2    3          4         5          6         7          8         9          10 11 12
+                                                                                                                       sim(1,m)
+         1   1          3                      ?        5                              5                       4        1.00
+         2              5          4                              4                               2            1   3   -0.18
+
+
+movies
+         3   2     4               1         2                    3                    4          3            5        0.41
+         4         2    4                    5                               4                                 2       -0.10
+         5              4          3         4          2                                                      2   5   -0.31
+         6   1          3                    3                               2                                 4        0.59
+                                                                            Here we use Pearson correlation as similarity:
+                 Neighbor selection:                                        1) Subtract mean rating mi from each movie i
+                 Identify movies similar to                                    m1 = (1+3+5+5+4)/5 = 3.6
+                                                                               row 1: [-2.6, 0, -0.6, 0, 0, 1.4, 0, 0, 1.4, 0, 0.4, 0]
+                 movie 1, rated by user 5                                   2) Compute cosine similarities between rows
+                       J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                     39
+                                                    users
+             1   2    3          4         5          6         7          8         9          10 11 12
+                                                                                                                     sim(1,m)
+         1   1        3                      ?        5                              5                       4        1.00
+         2            5          4                              4                               2            1   3   -0.18
+
+movies
+         3   2   4               1         2                    3                    4          3            5        0.41
+         4       2    4                    5                               4                                 2       -0.10
+         5            4          3         4          2                                                      2   5   -0.31
+         6   1        3                    3                               2                                 4        0.59
+
+             Compute similarity weights:
+             s1,3=0.41, s1,6=0.59
+                     J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                   40
+                                                     users
+             1    2    3          4         5          6         7          8         9          10 11 12
+
+         1   1         3                    2.6 5                                     5                       4
+
+         2             5          4                              4                               2            1   3
+
+
+movies
+         3   2    4               1         2                    3                    4          3            5
+
+         4        2    4                    5                               4                                 2
+
+         5             4          3         4          2                                                      2   5
+
+         6   1         3                    3                               2                                 4
+
+             Predict by taking weighted average:                                                                  σ𝒋∈𝑵(𝒊;𝒙) 𝒔𝒊𝒋 ⋅ 𝒓𝒋𝒙
+                                                                                                       𝒓𝒊𝒙 =
+             r1.5 = (0.41*2 + 0.59*3) / (0.41+0.59) = 2.6                                                               σ𝒔𝒊𝒋
+                      J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                       41
+ Estimate Joe’s rating for the movie The Sixth
+ Sense
+   Problem: Joe has not rated any movie “similar” to
+    The Sixth Sense
+
+ Global Baseline Approach
+   Mean movie rating: 3.7 stars
+   The Sixth Sense is 0.5 stars above avg.
+   Joe rates 0.2 stars below avg.
+
+   Baseline estimate: 3.7 + 0.5 – 0.2 = 4 stars
+              J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   42
+ Global Baseline estimate
+   Joe will give The Sixth Sense 4 stars
+
+ Local neighborhood (CF/NN)
+   Joe didn’t like related movie Signs
+   Rated it 1 star below his average rating
+
+ Final estimate
+   Joe will rate The Sixth Sense 4 – 1 = 3 stars
+
+              J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   43
+                                                                                                            Before:
+                                                                                                            r 
+                                                                                                                             sr
+                                                                                                                 jN ( i ; x ) ij xj
+
+                                                                                                                
+                                                                                                            xi
+                                                                                                                                s
+                                                                                                                    jN ( i ; x ) ij
+
+
+
+
+ Define similarity sij of items i and j
+ Select k nearest neighbors N(i; x)
+    Items most similar to i, that were rated by x
+ Estimate rating rxi as the weighted average:
+
+
+r b 
+                         jN ( i ; x )
+                                        sij  ( rxj  bxj )
+                                  
+  xi       xi
+                                                          s
+                                             jN ( i ; x ) ij
+
+baseline estimate for rxi                                    μ = overall mean movie rating
+                                                             bx = rating deviation of user x
+𝒃𝒙𝒊 = 𝝁 + 𝒃𝒙 + 𝒃𝒊
+                                                                 = (avg. rating of user x) – μ
+                                                             bi = rating deviation of movie i
+                    J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                      44
+        Avatar                LOTR                    Matrix                        Pirates
+
+Alice      1                                             0.8
+Bob
+                               0.5                                                  0.3
+Carol    0.9                                                  1                     0 .8
+David                                                         1                     0.4
+ In practice, it has been observed that item-item
+  often works better than user-user
+ Why? Items are simpler, users have multiple tastes
+                 J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   45
+ + Works for any kind of item
+   No feature selection needed
+ - Cold Start:
+   Need enough users in the system to find a match
+ - Sparsity:
+   The user/ratings matrix is sparse
+   Hard to find users that have rated the same items
+ - First rater:
+   Cannot recommend an item that has not been
+    previously rated
+   New items, Esoteric items
+ - Popularity bias:
+   Cannot recommend items to someone with
+    unique taste
+   Tends to recommend popular items
+                J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   46
+ Implement two or more different
+ recommenders and combine predictions
+  Perhaps using a linear model
+
+ Add content-based methods to
+ collaborative filtering
+  Item profiles for new item problem
+  Demographics to deal with new user problem
+
+
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   47
+                        Road Map
+
+
+• Basic Concepts: Recommender Systems
+• Content-based Rec Sys
+• Collaborative Rec Sys
+   • User-User Collaborative Systems
+   • Item-Item Collaborative Systems
+• Recommender Systems Evaluation
+                            movies
+
+            1           3           4
+                        3           5                                  5
+                                    4          5                       5
+                                    3
+users
+                                    3
+            2                                  2                       2
+                                                           5
+                         2          1                                  1
+                        3                                  3
+            1
+
+
+
+        J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   50
+                            movies
+
+           1           3           4
+                       3           5                                  5
+                                   4           5                      5
+                                   3
+users
+                                   3
+           2                                   ?                      ?
+                                                                                        Test Data Set
+                                                          ?
+                        2          1                                  ?
+                       3                                  ?
+           1
+
+
+
+        J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org           51
+ Compare predictions with known ratings
+   Root-mean-square error (RMSE)
+                          2
+                  ∗
+        σ𝑥𝑖 𝑟𝑥𝑖 − 𝑟𝑥𝑖         where 𝒓𝒙𝒊 is predicted, 𝒓∗𝒙𝒊 is the true rating of x on i
+   Precision at top 10:
+     % of those in top 10
+   Rank Correlation:
+     Spearman’s correlation between system’s and user’s complete rankings
+ Another approach: 0/1 model
+   Coverage:
+     Number of items/users for which system can make predictions
+   Precision:
+     Accuracy of predictions
+   Receiver operating characteristic (ROC)
+     Tradeoff curve between false positives and false negatives
+
+                 J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   52
+ Narrow focus on accuracy sometimes
+ misses the point
+   Prediction Diversity
+   Prediction Context
+   Order of predictions
+ In practice, we care only to predict high
+ ratings:
+   RMSE might penalize a method that does well
+    for high ratings and badly for others
+
+
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   53
+ Expensive step is finding k most similar
+  customers: O(|X|)
+ Too expensive to do at runtime
+   Could pre-compute
+ Naïve pre-computation takes time O(k ·|X|)
+      X … set of customers
+ We already know how to do this!
+   Near-neighbor search in high dimensions (LSH)
+   Clustering
+   Dimensionality reduction
+               J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   54
+ Leverage all the data
+   Don’t try to reduce data size in an
+    effort to make fancy algorithms work
+   Simple methods on large data do best
+
+ Add more data
+   e.g., add IMDB data on genres
+
+ More data beats better algorithms
+http://anand.typepad.com/datawocky/2008/03/more-data-usual.html
+
+
+
+
+                J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   55
+

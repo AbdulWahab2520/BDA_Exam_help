@@ -1,0 +1,333 @@
+   CS-404 Big Data Analytics
+
+Week 16 – Community Detection
+
+       Dr. Syed Imran Ali
+
+                                06/05/2026
+ We often think of networks being organized
+ into modules, cluster, communities:
+
+
+
+
+           J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   2
+J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   3
+ Discovering social circles, circles of trust:
+
+
+
+
+[McAuley, Leskovec: Discovering social circles in ego networks, 2012]
+                      J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   4
+                                                              Can we identify
+                                                               node groups?
+                                                              (communities,
+                                                             modules, clusters)
+
+
+
+
+                                                                   Nodes: Football Teams
+                                                                   Edges: Games played
+J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   5
+                                                                              NCAA conferences
+
+
+
+
+                                                                   Nodes: Football Teams
+                                                                   Edges: Games played
+J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org        6
+                                                                Can we identify
+                                                              functional modules?
+
+
+
+
+                                                     Nodes: Proteins
+                                                     Edges: Physical interactions
+J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   7
+Functional modules
+
+
+
+
+                                                                Nodes: Proteins
+                                                                Edges: Physical interactions
+           J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   8
+                                                                 Can we identify
+                                                               social communities?
+
+
+
+
+                                                                   Nodes: Facebook Users
+                                                                   Edges: Friendships
+J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   9
+ Non-overlapping vs. overlapping communities
+
+
+
+
+           J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   10
+                                                                                 Nodes
+
+
+
+
+                                                     Nodes
+
+
+
+
+Network                                                      Adjacency matrix
+
+
+
+
+    J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   11
+How to find communities?
+
+
+
+
+We will work with undirected (unweighted) networks
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   12
+ Edge betweenness: Number of
+  shortest paths passing over the edge                                                                     b=16
+                                                                                                                  b=7.5
+ Intuition:
+
+
+
+
+ Edge strengths (call volume)                                                         Edge betweenness
+      in a real network                                                                in a real network
+                   J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org             13
+                                                                                                       [Girvan-Newman ‘02]
+
+
+
+
+ Divisive hierarchical clustering based on the
+ notion of edge betweenness:
+   Number of shortest paths passing through the edge
+ Girvan-Newman Algorithm:
+        Undirected unweighted networks
+   Repeat until no edges are left:
+     Calculate betweenness of edges
+     Remove edges with highest betweenness
+   Connected components are communities
+   Gives a hierarchical decomposition of the network
+
+               J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                  14
+          12
+1
+                         33
+                                        49
+
+
+
+                                                                                            Need to re-compute
+                                                                                             betweenness at
+                                                                                               every step
+
+
+
+
+    J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                   15
+Step 1:                                               Step 2:
+
+
+
+
+Step 3:                                                Hierarchical network decomposition:
+
+
+
+
+          J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   16
+Communities in physics collaborations
+ J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   17
+1.   How to compute betweenness?
+2.   How to select the number of
+     clusters?
+
+
+
+         J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   18
+ Want to compute                                       Breath first search
+ betweenness of                                              starting from 𝑨:
+ paths starting at
+ node 𝑨                                                                                                 0
+
+
+                                                                                                        1
+
+
+                                                                                                        2
+
+
+                                                                                                        3
+
+
+                                                                                                        4
+
+
+           J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   19
+   Graph
+
+
+
+
+The edge (B,D) has the highest betweenness.
+
+In fact, this edge is on every shortest path between any of A, B, and
+C to any of D, E, F, and G. Its betweenness is therefore 3 ×4 =12.
+
+                   J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   20
+ Step 1 – BFS each node
+
+
+
+
+           J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   21
+ Step 2 – Label each node
+
+
+
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   22
+ Step 3 – Label each edge
+
+
+
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   23
+ Step 3 – Label each edge
+
+
+
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   24
+ Step 4 – Remove the edge with highest score
+
+
+
+
+           J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   25
+                                                                                         1                     5
+ Undirected graph 𝑮(𝑽, 𝑬):
+                                                                             2                                     6
+                                                                                                           4
+                                                                                         3
+ Bi-partitioning task:
+   Divide vertices into two disjoint groups 𝑨, 𝑩
+           A                    1                                              5                       B
+                     2                                                                   6
+                                  3                                      4
+
+ Questions:
+   How can we define a “good” partition of 𝑮?
+   How can we efficiently identify such a partition?
+               J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org               27
+                                                                                 Nodes
+
+
+
+
+                                                     Nodes
+
+
+
+
+Network                                                      Adjacency matrix
+
+
+
+
+    J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   28
+ A: adjacency matrix of undirected G
+   Aij =1 if (𝒊, 𝒋) is an edge, else 0
+ x is a vector in n with components (𝒙𝟏, … , 𝒙𝒏)
+   Think of it as a label/value of each node of 𝑮
+ What is the meaning of A x?
+
+
+
+
+ Entry yi is a sum of labels xj of neighbors of i
+               J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   29
+ jth coordinate of A x :
+   Sum of the x-values
+    of neighbors of j
+   Make this a new value at node j                                                             𝑨⋅𝒙=𝝀⋅𝒙
+ Spectral Graph Theory:
+   Analyze the “spectrum” of matrix representing 𝑮
+   Spectrum: Eigenvectors 𝒙𝒊 of a graph, ordered by
+    the magnitude (strength) of their corresponding
+    eigenvalues 𝝀𝒊 :
+
+
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org    30
+ Adjacency matrix (A):
+  n n matrix
+  A=[aij], aij=1 if edge between node i and j
+                                                                                     1        2      3   4   5   6
+                        5                                                   1        0        1      1   0   1   0
+     1
+                                                                            2        1        0      1   0   0   0
+ 2                                   6
+                  4                                                         3        1        1      0   1   0   0
+     3                                                                      4        0        0      1   0   1   1
+                                                                            5        1        0      0   1   0   1
+ Important properties:                                                     6        0        0      0   1   1   0
+  Symmetric matrix
+  Eigenvectors are real and orthogonal
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                   31
+ Degree matrix (D):
+  n n diagonal matrix
+  D=[dii], dii = degree of node i
+                                                                                     1        2      3   4   5   6
+
+                        5
+                                                                            1        3        0      0   0   0   0
+     1                                                                      2        0        2      0   0   0   0
+ 2                                   6                                      3        0        0      3   0   0   0
+                  4
+     3                                                                      4        0        0      0   3   0   0
+                                                                            5        0        0      0   0   3   0
+                                                                            6        0        0      0   0   0   2
+
+
+
+
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                   32
+                                                                                        1        2   3    4    5    6
+ Laplacian matrix (L):                                                        1        3       -1   -1   0    -1   0
+
+   n n symmetric matrix                                                      2       -1        2   -1   0    0    0
+                                                                               3       -1       -1   3    -1   0    0
+                          5
+       1
+                                                                               4        0        0   -1   3    -1   -1
+   2                                 6
+                    4                                                          5       -1        0   0    -1   3    -1
+       3                                                                       6        0        0   0    -1   -1   2
+
+
+ What is trivial eigenpair?                                                         𝑳 = 𝑫 − 𝑨
+   𝒙 = (𝟏, … , 𝟏) then 𝑳 ⋅ 𝒙 = 𝟎 and so 𝝀 = 𝝀𝟏 = 𝟎
+ Important properties:
+   Eigenvalues are non-negative real numbers
+   Eigenvectors are real and orthogonal
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org                       33
+ Girvan – Newman Algorithm
+ Spectral Clustering
+
+
+
+
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org   34
+

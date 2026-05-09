@@ -1,0 +1,870 @@
+    CS-404 Big Data Analytics
+
+Week 08 – Graph Mining (PageRank)
+
+         Dr. Syed Imran Ali
+
+                                    25/03/2026
+                                    Topics
+
+• Graph Data
+• Search Engines
+• PageRank – Initial Idea
+• PageRank – Improved Formulation
+• Two Key Challenges
+• PageRank – Google Formulation
+
+
+* J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+
+                                   Big Data Analytics
+            Web Search: 2 Challenges
+
+2 challenges of web search:
+ (1) Web contains many sources of information
+  Who to “trust”?
+  Trick: Trustworthy pages may point to each other!
+ (2) What is the “best” answer to query
+ “newspaper”?
+  No single right answer
+  Trick: Pages that actually know about newspapers
+   might all be pointing to many newspapers
+
+                  CS-895 Big Data Analytics
+             Ranking Nodes on the Graph
+
+• All web pages are not equally “important”
+   www.joe-schmoe.com vs. www.stanford.edu
+
+
+
+• There is large diversity
+  in the web-graph
+  node connectivity.
+  Let’s rank the pages by
+  the link structure!
+
+                       CS-895 Big Data Analytics
+      PageRank:
+The “Flow” Formulation
+
+
+
+
+      CS-895 Big Data Analytics
+                              Links as Votes
+
+• Idea: Links as votes
+   – Page is more important if it has more links
+      • In-coming links? Out-going links?
+
+• Think of in-links as votes:
+   – www.stanford.edu has 23,400 in-links
+
+   – www.joe-schmoe.com has 1 in-link
+
+
+• Are all in-links are equal?
+   – Links from important pages count more
+
+   – Recursive question!
+                           CS-895 Big Data Analytics
+            Example: PageRank Scores
+
+
+
+ A
+                      B
+3.3                                                                                                  C
+                     38.4
+                                                                                                    34.3
+
+
+
+
+       D
+                                                                E                                     F
+      3.9
+                                                               8.1                                   3.9
+
+
+            1.6
+                           1.6                                                            1.6              1.6
+                                              1.6
+                             CS-895 Big Data Analytics
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+          Simple Recursive Formulation
+
+ Each link’s vote is proportional to the
+  importance of its source page
+
+ If page j with importance rj has n out-links,
+  each link gets rj / n votes
+
+ Page j’s own importance is the sum of the
+  votes on its in-links                                              i         k
+                                                                         ri/3 r /4
+                                                                               k
+
+                                                                    j            rj/3
+              rj = ri/3+rk/4
+                                                                    rj/3       rj/3
+
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+         PageRank: The “Flow” Model
+
+ A “vote” from an important                                                                             y/2
+  page is worth more                                                                                        y
+ A page is important if it is
+                                                                                             a/2
+  pointed to by other important                                                                        y/2
+  pages                                                                                    a
+                                                                                                             m
+                                                                                                                      m
+ Define a “rank” rj for page j                                                                       a/2
+
+                   ri
+         rj                                                                              “Flow” equations:
+
+              i j di
+                                                                                                     ry = ry /2 + ra /2
+                                                                                                     ra = ry /2 + rm
+                                                                                                     rm = ra /2
+        𝒅𝒊 … out-degree  of node 𝒊
+                    CS-895 Big Data Analytics
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+            Solving the Flow Equations
+
+ 3 equations, 3 unknowns,                           ry = ry /2 + ra /2
+ no constants                                        ra = ry /2 + rm
+                                                     rm = ra /2
+   No unique solution
+   All solutions equivalent modulo the scale factor
+ Additional constraint forces uniqueness:
+   𝒓𝒚 + 𝒓𝒂 + 𝒓𝒎 = 𝟏
+                  𝟐              𝟐               𝟏
+   Solution: 𝒓𝒚 = , 𝒓𝒂         = , 𝒓𝒎         =
+                  𝟓              𝟓               𝟓
+ Gaussian elimination method works for
+  small examples, but we need a better
+  method for large web-size graphs
+ We need a new formulation!
+                   CS-895 Big Data Analytics
+      PageRank:
+ The Matrix Formulation
+
+(Stochastic Adjacency Matrix)
+
+
+
+
+          CS-895 Big Data Analytics
+           PageRank: Matrix Formulation
+
+ Stochastic adjacency matrix 𝑴
+   Let page 𝒊 has 𝒅𝒊 out-links
+                              1
+   If 𝒊 → 𝒋, then 𝑴𝒋𝒊 =          else             𝑴𝒋𝒊 = 0
+                              𝑑𝑖
+     𝑴 is a column stochastic matrix
+       Columns sum to 1
+ Rank vector 𝒓: vector with an entry per page
+   𝑟𝑖 is the importance score of page 𝑖
+   σ𝑖 𝑟𝑖 = 1
+                                                                   ri
+ The flow equations can be written                      rj  
+                                                              i j d i
+                     𝒓 = 𝑴⋅ 𝒓
+                       CS-895 Big Data Analytics
+                              Example
+                                                        ri
+ Remember the flow equation:
+                                              rj  
+                                                   i j d i
+ Flow equation in the matrix form
+                      𝑴⋅ 𝒓=𝒓
+   Suppose page i links to 3 pages, including j
+               i
+
+       j                                            rj
+                          .               =
+                                     ri
+ 1/3
+
+             M             .     r        =     r
+         Example: Flow Equations & M
+
+
+                                                   y     a   m
+     y                                           y ½    ½    0
+                                                 a ½    0    1
+ a          m                                    m 0    ½    0
+
+                                                       r = M∙r
+
+ry = ry /2 + ra /2                                y   ½ ½ 0      y
+ra = ry /2 + rm                                   a = ½ 0 1      a
+rm = ra /2                                        m   0 ½ 0      m
+
+
+                     CS-895 Big Data Analytics
+                 Power Iteration Method
+
+
+ Given a web graph with n nodes, where the
+
+ nodes are pages and edges are hyperlinks
+ Power iteration: a simple iterative scheme
+                                                                        (t )
+   Suppose there are N web pages                      rj
+                                                          ( t 1)
+                                                                  
+                                                                        ri
+                                                                   i j di
+   Initialize: r(0) = [1/N,….,1/N]T
+
+   Iterate: r(t+1) = M ∙ r(t)                     di …. out-degree of node i
+
+
+   Stop when |r(t+1) – r(t)|1 < 
+                       CS-895 Big Data Analytics
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+    CS-404 Big Data Analytics
+
+Week 09 – Graph Mining (PageRank)
+
+         Dr. Syed Imran Ali
+
+                                    30/03/2026
+                                    Topics
+
+• Graph Data
+• Search Engines
+• PageRank – Initial Idea
+• PageRank – Improved Formulation
+• Two Key Challenges
+• PageRank – Google Formulation
+
+
+* J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+
+                                   Big Data Analytics
+            Example: PageRank Scores
+
+
+
+ A
+                      B
+3.3                                                                                                  C
+                     38.4
+                                                                                                    34.3
+
+
+
+
+       D
+                                                                E                                     F
+      3.9
+                                                               8.1                                   3.9
+
+
+            1.6
+                           1.6                                                            1.6              1.6
+                                              1.6
+                             CS-895 Big Data Analytics
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+         PageRank: The “Flow” Model
+
+ A “vote” from an important                                                                             y/2
+  page is worth more                                                                                        y
+ A page is important if it is
+                                                                                             a/2
+  pointed to by other important                                                                        y/2
+  pages                                                                                    a
+                                                                                                             m
+                                                                                                                      m
+ Define a “rank” rj for page j                                                                       a/2
+
+                   ri
+         rj                                                                              “Flow” equations:
+
+              i j di
+                                                                                                     ry = ry /2 + ra /2
+                                                                                                     ra = ry /2 + rm
+                                                                                                     rm = ra /2
+        𝒅𝒊 … out-degree  of node 𝒊
+                    CS-895 Big Data Analytics
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+           PageRank: Matrix Formulation
+
+ Stochastic adjacency matrix 𝑴
+   Let page 𝒊 has 𝒅𝒊 out-links
+                              1
+   If 𝒊 → 𝒋, then 𝑴𝒋𝒊 =          else             𝑴𝒋𝒊 = 0
+                              𝑑𝑖
+     𝑴 is a column stochastic matrix
+       Columns sum to 1
+ Rank vector 𝒓: vector with an entry per page
+   𝑟𝑖 is the importance score of page 𝑖
+   σ𝑖 𝑟𝑖 = 1
+                                                                   ri
+ The flow equations can be written                      rj  
+                                                              i j d i
+                     𝒓 = 𝑴⋅ 𝒓
+                       CS-895 Big Data Analytics
+                Eigenvector Formulation
+
+ The flow equations can be written
+             𝒓 = 𝑴 ∙ 𝒓
+ So the rank vector r is an eigenvector of the
+ stochastic web matrix M
+   In fact, its first or principal eigenvector,
+    with corresponding eigenvalue 1                     NOTE: x is an
+                                                        eigenvector with
+     Largest eigenvalue of M is 1 since M is           the corresponding
+                                                        eigenvalue λ if:
+      column stochastic (with non-negative entries)        𝑨𝒙 = 𝝀𝒙
+       We know r is unit length and each column of M
+        sums to one, so 𝑴𝒓 ≤ 𝟏
+
+ We can now efficiently solve for r!
+ The method is called Power iteration
+                        CS-895 Big Data Analytics
+         Example: Flow Equations & M
+
+
+                                                   y     a   m
+     y                                           y ½    ½    0
+                                                 a ½    0    1
+ a          m                                    m 0    ½    0
+
+                                                       r = M∙r
+
+ry = ry /2 + ra /2                                y   ½ ½ 0      y
+ra = ry /2 + rm                                   a = ½ 0 1      a
+rm = ra /2                                        m   0 ½ 0      m
+
+
+                     CS-895 Big Data Analytics
+                 Power Iteration Method
+
+
+ Given a web graph with n nodes, where the
+
+ nodes are pages and edges are hyperlinks
+ Power iteration: a simple iterative scheme
+                                                                        (t )
+   Suppose there are N web pages                      rj
+                                                          ( t 1)
+                                                                  
+                                                                        ri
+                                                                   i j di
+   Initialize: r(0) = [1/N,….,1/N]T
+
+   Iterate: r(t+1) = M ∙ r(t)                     di …. out-degree of node i
+
+
+   Stop when |r(t+1) – r(t)|1 < 
+                       CS-895 Big Data Analytics
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+               PageRank: How to solve?
+
+                                                        y   a     m
+ Power Iteration:                       y
+                                                 y      ½   ½      0
+  Set 𝑟𝑗 = 1/N                                  a      ½   0      1
+                 𝑟𝑖                  a       m   m      0   ½      0
+  1: 𝑟′𝑗 = σ𝑖→𝑗
+                 𝑑𝑖
+                                                  ry = ry /2 + ra /2
+  2: 𝑟 = 𝑟′                                      ra = ry /2 + rm
+  Goto 1                                         rm = ra /2
+
+ Example:
+ ry       1/3       1/3       5/12   9/24        6/15
+ ra =     1/3       3/6       1/3    11/24 …     6/15
+ rm       1/3       1/6       3/12   1/6         3/15
+           Iteration 0, 1, 2, …
+Random Walk Interpretation of the
+      PageRank Algorithm
+
+
+
+
+            CS-895 Big Data Analytics
+             The Stationary Distribution
+
+                                                i1       i2   i3
+ Where is the surfer at time t+1?
+   Follows a link uniformly at random
+                                                     j
+    𝒑 𝒕 + 𝟏 = 𝑴 ⋅ 𝒑(𝒕)             p (t  1)  M  p (t )
+ Suppose the random walk reaches a state
+  𝒑 𝒕 + 𝟏 = 𝑴 ⋅ 𝒑(𝒕) = 𝒑(𝒕)
+  then 𝒑(𝒕) is stationary distribution of a random walk
+ Our original rank vector 𝒓 satisfies 𝒓 = 𝑴 ⋅ 𝒓
+   So, 𝒓 is a stationary distribution for
+    the random walk
+
+                    CS-895 Big Data Analytics
+            Existence and Uniqueness
+
+ A central result from the theory of random
+ walks (a.k.a. Markov processes):
+
+
+   For graphs that satisfy certain conditions,
+    the stationary distribution is unique and
+ eventually will be reached no matter what the
+   initial probability distribution at time t = 0
+
+
+                  CS-895 Big Data Analytics
+Google Formulation
+                 PageRank: Three Questions
+
+                      (t )
+                      ri
+                
+      ( t 1)
+ rj
+                 i j di
+                                     or
+                                 equivalently     r  Mr
+ Does this converge?
+
+ Does it converge to what we want?
+
+ Are results reasonable?
+
+                      CS-895 Big Data Analytics
+             Does this converge?
+
+
+                                                                      (t )
+                                                                      ri
+                                                                
+                                                      ( t 1)
+             a                       b           rj
+                                                                 i j di
+
+ Example:
+    ra       1          0           1        0
+         =
+    rb       0          1           0        1
+             Iteration 0, 1, 2, …
+
+
+
+
+                 CS-895 Big Data Analytics
+         Does it converge to what we want?
+
+
+
+                                                                      (t )
+                                                                      ri
+                                                                
+                                                      ( t 1)
+             a                       b           rj
+                                                                 i j di
+
+ Example:
+    ra       1          0           0        0
+         =
+    rb       0          1           0        0
+              Iteration 0, 1, 2, …
+
+
+
+
+                 CS-895 Big Data Analytics
+                PageRank: Problems
+                                                  Dead end
+2 problems:
+ (1) Some pages are
+  dead ends (have no out-links)
+   Random walk has “nowhere” to go to
+   Such pages cause importance to “leak out”
+
+ (2) Spider traps:
+  (all out-links are within the group)
+   Random walked gets “stuck” in a trap
+   And eventually spider traps absorb all importance
+                      Problem: Spider Traps
+
+                                                                       y     a     m
+ Power Iteration:                             y
+                                                               y      ½      ½      0
+   Set 𝑟𝑗 = 1                                                 a      ½      0      0
+              𝑟𝑖                           a           m       m       0     ½      1
+   𝑟𝑗 = σ𝑖→𝑗
+              𝑑𝑖
+                                          m is a spider trap       ry = ry /2 + ra /2
+      And iterate
+                                                                   ra = ry /2
+                                                                   rm = ra /2 + rm
+ Example:
+ ry            1/3       2/6       3/12    5/24                0
+ ra =          1/3       1/6       2/12    3/24 …              0
+ rm            1/3       3/6       7/12    16/24               1
+                Iteration 0, 1, 2, …
+ All the PageRank score gets “trapped”
+                          CS-895 Big Data in node m.
+                                         Analytics
+                 Solution: Teleports!
+
+ The Google solution for spider traps: At each
+  time step, the random surfer has two options
+   With prob. , follow a link at random
+   With prob. 1-, jump to some random page
+   Common values for  are in the range 0.8 to 0.9
+ Surfer will teleport out of spider trap
+  within a few time steps
+                           y                       y
+
+                       a              m        a       m
+                   CS-895 Big Data Analytics
+                       Problem: Dead Ends
+
+                                                                    y     a     m
+ Power Iteration:                            y
+                                                             y     ½      ½      0
+  Set 𝑟𝑗 = 1                                                 a    ½      0      0
+             𝑟𝑖                           a           m      m      0     ½      0
+  𝑟𝑗 = σ𝑖→𝑗
+             𝑑𝑖
+                                                                ry = ry /2 + ra /2
+     And iterate
+                                                                ra = ry /2
+                                                                rm = ra /2
+ Example:
+ ry            1/3      2/6       3/12    5/24              0
+ ra =          1/3      1/6       2/12    3/24     …        0
+ rm            1/3      1/6       1/12    2/24              0
+               Iteration 0, 1, 2, …
+Here the PageRank “leaks”CS-895
+                          out Big
+                               since the
+                                   Data   matrix is not stochastic.
+                                        Analytics
+                    Solution: Always Teleport!
+
+ Teleports: Follow random teleport links with
+ probability 1.0 from dead-ends
+   Adjust matrix accordingly
+
+            y                                y
+
+        a             m              a               m
+        y       a    m                   y       a   m
+    y   ½       ½     0          y   ½           ½   ⅓
+    a   ½       0     0          a   ½           0   ⅓
+   m    0       ½     0          m       0       ½   ⅓
+               Why Teleports Solve the
+                     Problem?
+Why are dead-ends and spider traps a problem
+and why do teleports solve the problem?
+ Spider-traps are not a problem, but with traps
+  PageRank scores are not what we want
+   Solution: Never get stuck in a spider trap by
+    teleporting out of it in a finite number of steps
+ Dead-ends are a problem
+   The matrix is not column stochastic so our initial
+    assumptions are not met
+   Solution: Make matrix column stochastic by always
+    teleporting when there is nowhere else to go
+                     CS-895 Big Data Analytics
+                  Solution: Random Teleports
+
+ Google’s solution that does it all:
+ Makes M stochastic, aperiodic, irreducible
+  At each step, random surfer has two options:
+   With probability , follow a link at random
+   With probability 1-, jump to some random page
+
+ PageRank equation [Brin-Page, 98]
+                                                                        di … out-degree
+                𝑟𝑖           1                                                 of node i
+       𝑟𝑗 = ෍ 𝛽    + (1 − 𝛽)
+                𝑑𝑖           𝑁
+                  𝑖→𝑗
+       This formulation assumes that 𝑴 has no dead ends. We can either
+     preprocess matrix 𝑴 to remove all dead ends or explicitly follow random
+                                CS-895
+                teleport links with    Big Data Analytics
+                                    probability 1.0 from dead-ends.
+                    The Google Matrix
+ PageRank equation [Brin-Page, ‘98]
+                      𝑟𝑖            1
+           𝑟𝑗 = ෍ 𝛽 + (1 − 𝛽)
+                      𝑑𝑖            𝑁
+                𝑖→𝑗
+ The Google Matrix A:                 [1/N] …N by N matrix
+                                                  NxN
+
+                                1      where all entries are 1/N
+
+           𝐴=𝛽𝑀+ 1−𝛽
+                                𝑁 𝑁×𝑁
+ A is stochastic, aperiodic and irreducible, so
+         𝒓(𝒕+𝟏) = 𝑨 ⋅ 𝒓(𝒕)
+And the Power method still works!
+ What is  ?
+   In practice  =0.8,0.9 (make 5 steps on avg., jump)
+              Random Teleports ( = 0.8)
+
+                                                    M                 [1/N]NxN
+              0.8*1/2+0.2*1/3
+          y                             1/2 1/2 0                   1/3 1/3 1/3
+                                    0.8 1/2 0 0               + 0.2 1/3 1/3 1/3
+                                         0 1/2 1                    1/3 1/3 1/3
+
+                                                y 7/15 7/15 1/15
+                        0.8+0.2*1/3
+                                                a 7/15 1/15 1/15
+a                                               m 1/15 7/15 13/15
+                        m
+                                                               A
+
+    y         1/3    0.33 0.24            0.26                 7/33
+    a =       1/3    0.20 0.20            0.18          ...    5/33
+    m         1/3    0.46 0.52            0.56                21/33
+                        CS-895 Big Data Analytics
+              Random Teleports ( = 0.8)
+
+                                                   M                 [1/N]NxN
+              7/15
+          y                            1/2 1/2 0                   1/3 1/3 1/3
+                                   0.8 1/2 0 0               + 0.2 1/3 1/3 1/3
+                                        0 1/2 1                    1/3 1/3 1/3
+
+                                               y 7/15 7/15 1/15
+                          13/15
+                                               a 7/15 1/15 1/15
+a                                              m 1/15 7/15 13/15
+                      m
+                                                              A
+
+    y         1/3    0.33 0.24           0.26                 7/33
+    a =       1/3    0.20 0.20           0.18          ...    5/33
+    m         1/3    0.46 0.52           0.56                21/33
+                       CS-895 Big Data Analytics
+                  Matrix Formulation
+
+• Suppose there are N pages
+• Consider page i, with di out-links
+• We have Mji = 1/|di| when i → j
+       and Mji = 0 otherwise
+• The random teleport is equivalent to:
+  – Adding a teleport link from i to every other page
+    and setting transition probability to (1-)/N
+  – Reducing the probability of following each
+    out-link from 1/|di| to /|di|
+  – Equivalent: Tax each page a fraction (1-) of its
+    score and redistribute evenly
+
+
+                    CS-895 Big Data Analytics
+                          Rearranging the Equation
+
+                                                  𝟏−𝜷
+   • 𝒓 = 𝑨 ⋅ 𝒓, where 𝑨𝒋𝒊 = 𝜷 𝑴𝒋𝒊 +
+                                                   𝑵
+   • 𝑟𝑗 = σ𝑁
+           i=1 𝐴𝑗𝑖 ⋅ 𝑟𝑖
+                            1−𝛽
+   •   𝑟𝑗 = σ𝑁
+             𝑖=1    𝛽 𝑀𝑗𝑖 +        ⋅ 𝑟𝑖
+                             𝑁
+                               1−𝛽 𝑁
+             = σ𝑁
+                i=1 𝛽 𝑀𝑗𝑖 ⋅ 𝑟𝑖 +   σi=1 𝑟𝑖
+                                𝑁
+
+                                                   since σ𝑟𝑖 = 1
+                               1−𝛽
+           = σ𝑁
+              i=1 𝛽 𝑀𝑗𝑖 ⋅ 𝑟𝑖 +
+                                𝑁
+                                   𝟏−𝜷
+   •   So we get: 𝒓 = 𝜷 𝑴 ⋅ 𝒓 +
+                                    𝑵 𝑵
+
+
+
+
+Note: Here we assumed M
+has no dead-ends
+                                          [x]N … a vector   of length N with all entries x
+                              CS-895 Big Data Analytics
+              Sparse Matrix Formulation
+
+• We just rearranged the PageRank equation
+                           𝟏−𝜷
+              𝒓 = 𝜷𝑴 ⋅ 𝒓 +
+                            𝑵 𝑵
+     • where [(1-)/N]N is a vector with all N entries (1-)/N
+
+
+• M is a sparse matrix! (with no dead-ends)
+  – 10 links per node, approx 10N entries
+• So in each iteration, we need to:
+  – Compute rnew =  M ∙ rold
+  – Add a constant value (1-)/N to each entry in rnew
+     • Note if M contains dead-ends then σ𝒋 𝒓𝒏𝒆𝒘
+                                             𝒋    < 𝟏 and
+       we also have to renormalize rnew so that it sums to 1
+                      CS-895 Big Data Analytics
+                   PageRank: The Complete Algorithm
+
+• Input: Graph 𝑮 and parameter 𝜷
+    – Directed graph 𝑮 (can have spider traps and dead ends)
+    – Parameter 𝜷
+• Output: PageRank vector 𝒓𝒏𝒆𝒘
+                         1
+    – Set: 𝑟𝑗𝑜𝑙𝑑 =
+                         𝑁
+    – repeat until convergence: σ𝑗 𝑟𝑗𝑛𝑒𝑤 − 𝑟𝑗𝑜𝑙𝑑 > 𝜀
+                                     𝒐𝒍𝒅
+                                 𝒓𝒊
+          •   ∀𝑗: 𝒓′𝒏𝒆𝒘
+                    𝒋   = σ𝒊→𝒋 𝜷  𝒅      𝒊
+
+                   𝒓′𝒏𝒆𝒘
+                     𝒋   = 𝟎 if in-degree of 𝒋 is 0
+          • Now re-insert the leaked PageRank:
+                             𝒏𝒆𝒘    𝟏−𝑺
+              ∀𝒋: 𝒓𝒏𝒆𝒘
+                   𝒋   = 𝒓′ 𝒋      + 𝑵
+                                               where: 𝑆 =
+          • 𝒓𝒐𝒍𝒅 = 𝒓𝒏𝒆𝒘                        σ𝑗 𝑟′𝑗𝑛𝑒𝑤
+
+If the graph has no dead-ends then the amount of leaked PageRank is 1-β. But since we have dead-ends
+the amount of leaked PageRank mayCS-895     Big Data Analytics
+                                     be larger. We have to explicitly account for it by computing S.
+

@@ -25,7 +25,7 @@ from bda_style import (
     REV_RED, REV_BG, REF_INDIGO, REF_BG, USABLE_W,
 )
 
-OUT = "BDA_W08-09_PageRank_ExamPrep.pdf"
+OUT = "ExamPrep_PDFs/BDA_W08-09_PageRank_ExamPrep.pdf"
 S = build_stylesheet()
 
 

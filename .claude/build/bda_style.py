@@ -336,16 +336,35 @@ def autofit_table(data, *, header: bool = True, header_bg=NAVY,
                 est = (max((len(line) for line in txt.splitlines()), default=0) + 1) * 6.2
                 col_widths[c] = max(col_widths[c], est)
     # Add padding allowance per column
-    col_widths = [w + 14 for w in col_widths]
+    col_widths = [max(w + 14, 30) for w in col_widths]  # min 30pt per col
     total = sum(col_widths)
     if total > USABLE_W:
-        # scale down proportionally
+        # scale down proportionally but enforce min width per column
+        min_col_w = 30  # don't let a column shrink below 30pt
+        # start with scaled widths
         scale = USABLE_W / total
-        col_widths = [w * scale for w in col_widths]
+        scaled = [max(w * scale, min_col_w) for w in col_widths]
+        # if min-clamping pushed total over USABLE_W, shrink the largest cols only
+        excess = sum(scaled) - USABLE_W
+        if excess > 0:
+            # iteratively trim from biggest cols until we fit
+            for _ in range(40):
+                idx = max(range(len(scaled)), key=lambda i: scaled[i])
+                if scaled[idx] - 1 < min_col_w:
+                    break
+                scaled[idx] -= excess / max(1, len(scaled))
+                excess = sum(scaled) - USABLE_W
+                if excess <= 0:
+                    break
+        col_widths = scaled
     elif total < USABLE_W * 0.6:
-        # spread to fill at least 60% of width for readability
         extra = (USABLE_W * 0.7 - total) / cols
         col_widths = [w + extra for w in col_widths]
+    # final safety: ensure all >= min and total <= USABLE_W
+    col_widths = [max(w, 30) for w in col_widths]
+    if sum(col_widths) > USABLE_W:
+        scale = USABLE_W / sum(col_widths)
+        col_widths = [w * scale for w in col_widths]
 
     # Convert plain strings to Paragraphs so they wrap inside cells
     P_body = ParagraphStyle("CellBody", fontName=body_font, fontSize=body_size,

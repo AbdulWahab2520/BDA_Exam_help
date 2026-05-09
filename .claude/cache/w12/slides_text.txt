@@ -1,0 +1,506 @@
+    CS-404 Big Data Analytics
+
+Week 12 – Graph Mining (PageRank)
+
+         Dr. Syed Imran Ali
+
+                                    08/04/2026
+                                    Topics
+
+• Topic Sensitive PageRank
+• Web Spam
+• Trust Rank
+• In Class Activity
+
+
+
+
+* J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+
+                                   Big Data Analytics
+            Example: PageRank Scores
+
+
+
+ A
+                      B
+3.3                                                                                                  C
+                     38.4
+                                                                                                    34.3
+
+
+
+
+       D
+                                                                E                                     F
+      3.9
+                                                               8.1                                   3.9
+
+
+            1.6
+                           1.6                                                            1.6              1.6
+                                              1.6
+                             CS-895 Big Data Analytics
+            J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+         PageRank: The “Flow” Model
+
+ A “vote” from an important                                                                             y/2
+  page is worth more                                                                                        y
+ A page is important if it is
+                                                                                             a/2
+  pointed to by other important                                                                        y/2
+  pages                                                                                    a
+                                                                                                             m
+                                                                                                                      m
+ Define a “rank” rj for page j                                                                       a/2
+
+                   ri
+         rj                                                                              “Flow” equations:
+
+              i j di
+                                                                                                     ry = ry /2 + ra /2
+                                                                                                     ra = ry /2 + rm
+                                                                                                     rm = ra /2
+        𝒅𝒊 … out-degree  of node 𝒊
+                    CS-895 Big Data Analytics
+             J. Leskovec, A. Rajaraman, J. Ullman: Mining of Massive Datasets, http://www.mmds.org
+         Example: Flow Equations & M
+
+
+                                                   y     a   m
+     y                                           y ½    ½    0
+                                                 a ½    0    1
+ a          m                                    m 0    ½    0
+
+                                                       r = M∙r
+
+ry = ry /2 + ra /2                                y   ½ ½ 0      y
+ra = ry /2 + rm                                   a = ½ 0 1      a
+rm = ra /2                                        m   0 ½ 0      m
+
+
+                     CS-895 Big Data Analytics
+              Random Teleports ( = 0.8)
+
+                                                    M                 [1/N]NxN
+              0.8*1/2+0.2*1/3
+          y                             1/2 1/2 0                   1/3 1/3 1/3
+                                    0.8 1/2 0 0               + 0.2 1/3 1/3 1/3
+                                         0 1/2 1                    1/3 1/3 1/3
+
+                                                y 7/15 7/15 1/15
+                        0.8+0.2*1/3
+                                                a 7/15 1/15 1/15
+a                                               m 1/15 7/15 13/15
+                        m
+                                                               A
+
+    y         1/3    0.33 0.24            0.26                 7/33
+    a =       1/3    0.20 0.20            0.18          ...    5/33
+    m         1/3    0.46 0.52            0.56                21/33
+                        CS-895 Big Data Analytics
+                   PageRank: The Complete Algorithm
+
+• Input: Graph 𝑮 and parameter 𝜷
+    – Directed graph 𝑮 (can have spider traps and dead ends)
+    – Parameter 𝜷
+• Output: PageRank vector 𝒓𝒏𝒆𝒘
+                         1
+    – Set: 𝑟𝑗𝑜𝑙𝑑 =
+                         𝑁
+    – repeat until convergence: σ𝑗 𝑟𝑗𝑛𝑒𝑤 − 𝑟𝑗𝑜𝑙𝑑 > 𝜀
+                                     𝒐𝒍𝒅
+                                 𝒓𝒊
+          •   ∀𝑗: 𝒓′𝒏𝒆𝒘
+                    𝒋   = σ𝒊→𝒋 𝜷  𝒅      𝒊
+
+                   𝒓′𝒏𝒆𝒘
+                     𝒋   = 𝟎 if in-degree of 𝒋 is 0
+          • Now re-insert the leaked PageRank:
+                             𝒏𝒆𝒘    𝟏−𝑺
+              ∀𝒋: 𝒓𝒏𝒆𝒘
+                   𝒋   = 𝒓′ 𝒋      + 𝑵
+                                               where: 𝑆 =
+          • 𝒓𝒐𝒍𝒅 = 𝒓𝒏𝒆𝒘                        σ𝑗 𝑟′𝑗𝑛𝑒𝑤
+
+If the graph has no dead-ends then the amount of leaked PageRank is 1-β. But since we have dead-ends
+the amount of leaked PageRank mayCS-895     Big Data Analytics
+                                     be larger. We have to explicitly account for it by computing S.
+          Some Problems with PageRank
+
+• Measures generic popularity of a page
+  – Will ignore/miss topic-specific authorities
+  – Solution: Topic-Specific PageRank (next)
+• Uses a single measure of importance
+  – Other models of importance
+  – Solution: Hubs-and-Authorities
+• Susceptible to Link spam
+  – Artificial link topographies created in order to boost
+    page rank
+  – Solution: TrustRank
+              Topic-Specific PageRank
+
+• Instead of generic popularity, can we
+  measure popularity within a topic?
+• Goal: Evaluate Web pages not just according to
+  their popularity, but by how close they are to a
+  particular topic, e.g. “sports” or “history”
+• Allows search queries to be answered
+  based on interests of the user
+  – Example: Query “Trojan” wants different pages
+    depending on whether you are interested in sports,
+    history and computer security
+                   Topic-Specific PageRank
+
+• Random walker has a small probability of teleporting at
+  any step
+• Teleport can go to:
+   – Standard PageRank: Any page with equal probability
+       • To avoid dead-end and spider-trap problems
+   – Topic Specific PageRank: A topic-specific set of “relevant”
+     pages (teleport set)
+• Idea: Bias the random walk
+   – When walker teleports, she pick a page from a set S
+   – S contains only pages that are relevant to the topic
+       • E.g., Open Directory (DMOZ) pages for a given topic/query
+   – For each teleport set S, we get a different vector rS
+                         Matrix Formulation
+
+• To make this work all we need is to update the
+  teleportation part of the PageRank formulation:
+       𝑨𝒊𝒋 =            𝜷 𝑴𝒊𝒋 + (𝟏 − 𝜷)/|𝑺| if 𝒊 ∈ 𝑺
+                        𝜷 𝑴𝒊𝒋 + 𝟎               otherwise
+   – A is stochastic!
+• We weighted all pages in the teleport set S equally
+   – Could also assign different weights to pages!
+• Compute as for regular PageRank:
+   – Multiply by M, then add a vector
+   – Maintains sparseness
+               Example: Topic-Specific PageRank
+
+               0.2                      Suppose S = {1},  = 0.8
+   0.5     1     0.5
+                                       Node     Iteration
+0.4                 0.4                         0         1      2 …      stable
+           1                           1        0.25      0.4    0.28     0.294
+   2 0.8                   3           2        0.25      0.1    0.16     0.118
+                      1                3        0.25      0.3    0.32     0.327
+                               1
+                                       4        0.25      0.2    0.24     0.261
+                     0.8       0.8
+
+                           4                                S={1,2,3,4}, β=0.8:
+                                                            r=[0.13, 0.10, 0.39, 0.36]
+                               S={1}, β=0.90:               S={1,2,3} , β=0.8:
+                               r=[0.17, 0.07, 0.40, 0.36]   r=[0.17, 0.13, 0.38, 0.30]
+                               S={1} , β=0.8:               S={1,2} , β=0.8:
+                               r=[0.29, 0.11, 0.32, 0.26]   r=[0.26, 0.20, 0.29, 0.23]
+                               S={1}, β=0.70:               S={1} , β=0.8:
+                               r=[0.39, 0.14, 0.27, 0.19]   r=[0.29, 0.11, 0.32, 0.26]
+           Discovering the Topic Vector S
+
+• Create different PageRanks for different
+  topics
+  – The 16 DMOZ top-level categories:
+     • arts, business, sports,…
+• Which topic ranking to use?
+  – User can pick from a menu
+  – Classify query into a topic
+  – Can use the context of the query
+     • E.g., query is launched from a web page talking about a known
+       topic
+     • History of queries e.g., “basketball” followed by “Jordan”
+  – User context, e.g., user’s bookmarks, …
+      TrustRank:
+Combating the Web Spam
+                   What is Web Spam?
+
+• Spamming:
+   – Any deliberate action to boost a web
+     page’s position in search engine results,
+     incommensurate with page’s real value
+• Spam:
+   – Web pages that are the result of spamming
+• This is a very broad definition
+   – SEO industry might disagree!
+   – SEO = search engine optimization
+
+• Approximately 10-15% of web pages are spam
+                            Web Search
+
+• Early search engines:
+  – Crawl the Web
+  – Index pages by the words they contained
+  – Respond to search queries (lists of words) with
+    the pages containing those words
+• Early page ranking:
+  – Attempt to order pages matching a search query by
+    “importance”
+  – First search engines considered:
+     • (1) Number of times query words appeared
+     • (2) Prominence of word position, e.g. title, header
+                     First Spammers
+
+• As people began to use search engines to find
+  things on the Web, those with commercial
+  interests tried to exploit search engines to
+  bring people to their own site – whether they
+  wanted to be there or not
+• Example:
+  – Shirt-seller might pretend to be about “movies”
+• Techniques for achieving high
+  relevance/importance for a web page
+            First Spammers: Term Spam
+
+• How do you make your page appear to be
+  about movies?
+  – (1) Add the word movie 1,000 times to your page
+  – Set text color to the background color, so only search
+    engines would see it
+  – (2) Or, run the query “movie” on your
+    target search engine
+  – See what page came first in the listings
+  – Copy it into your page, make it “invisible”
+• These and similar techniques are term
+  spam
+         Google’s Solution to Term Spam
+
+• Believe what people say about you, rather
+  than what you say about yourself
+  – Use words in the anchor text (words that appear
+    underlined to represent the link) and its surrounding
+    text
+
+• PageRank as a tool to measure the
+  “importance” of Web pages
+                      Why It Works?
+
+• Our hypothetical shirt-seller looses
+  – Saying he is about movies doesn’t help, because
+    others don’t say he is about movies
+  – His page isn’t very important, so it won’t be ranked
+    high for shirts or movies
+• Example:
+  – Shirt-seller creates 1,000 pages, each links to his with
+    “movie” in the anchor text
+  – These pages have no links in, so they get little PageRank
+  – So the shirt-seller can’t beat truly important movie
+    pages, like IMDB
+Why it does not work?
+    SPAM FARMING
+
+
+
+
+SPAM FARMING
+         Google vs. Spammers: Round 2!
+
+• Once Google became the dominant search
+  engine, spammers began to work out ways to
+  fool Google
+
+• Spam farms were developed to concentrate
+  PageRank on a single page
+
+• Link spam:
+  – Creating link structures that
+    boost PageRank of a particular
+    page
+                       Link Spamming
+
+• Three kinds of web pages from a
+  spammer’s point of view
+  – Inaccessible pages
+  – Accessible pages
+    • e.g., blog comments pages
+    • spammer can post links to his pages
+  – Owned pages
+    • Completely controlled by spammer
+    • May span multiple domain names
+                        Link Farms
+
+• Spammer’s goal:
+  – Maximize the PageRank of target page t
+
+• Technique:
+  – Get as many links from accessible pages as possible
+    to target page t
+  – Construct “link farm” to get PageRank
+    multiplier effect
+                Link Farms
+               Accessible       Owned
+
+
+Inaccessible                            1
+
+                                        2
+                            t
+
+
+
+
+                                    M
+
+                                    Millions of
+                                    farm pages
+
+
+ One of the most common and effective
+      organizations for a link farm
+                                     Analysis
+                            Accessible       Owned
+
+       Inaccessible                              1
+                                         t        2
+
+                                                       N…# pages on the web
+                                                       M…# of pages spammer
+                                                 M     owns
+
+• x: PageRank contributed by accessible pages
+• y: PageRank of target page t
+                                         𝛽𝒚   1−𝛽
+• Rank of each “farm” page =                +
+                                         𝑀     𝑁
+                      𝛽𝑦   1−𝛽       1−𝛽
+• 𝒚 = 𝑥 + 𝛽𝑀             +       +       Very small; ignore
+                      𝑀     𝑁         𝑁
+                                         Now we solve for y
+
+         𝒙     𝑴                     𝛽
+•   𝒚=      +𝒄            where 𝑐 =
+       𝟏−𝜷𝟐    𝑵                    1+𝛽
+                              Analysis
+                       Accessible       Owned
+
+       Inaccessible                        1
+                                    t       2
+
+                                                N…# pages on the web
+                                                M…# of pages spammer
+                                           M    owns
+
+         𝒙      𝑴                    𝛽
+• 𝒚=        + 𝒄       where 𝑐 =
+       𝟏−𝜷𝟐     𝑵                   1+𝛽
+• For  = 0.85, 1/(1-2)= 3.6
+
+• Multiplier effect for acquired PageRank
+• By making M large, we can make y as
+  large as we want
+                      Combating Spam
+
+• Combating term spam
+  – Analyze text using statistical methods
+  – Similar to email spam filtering
+  – Also useful: Detecting approximate duplicate pages
+• Combating link spam
+  – Detection and blacklisting of structures that
+    look like spam farms
+     • Leads to another war – hiding and detecting spam farms
+  – TrustRank = topic-specific PageRank with a teleport
+    set of trusted pages
+     • Example: .edu domains, similar domains for non-US schools
+                     TrustRank: Idea
+
+• Basic principle: Approximate isolation
+  – It is rare for a “good” page to point to a “bad” (spam)
+    page
+
+• Sample a set of seed pages from the web
+
+• Have an oracle (human) to identify the good
+  pages and the spam pages in the seed set
+  – Expensive task, so we must make seed set as
+    small as possible
+                     Trust Propagation
+
+• Call the subset of seed pages that are identified
+  as good the trusted pages
+
+• Perform a topic-sensitive PageRank with
+  teleport set = trusted pages
+  – Propagate trust through links:
+     • Each page gets a trust value between 0 and 1
+
+
+• Solution 1: Use a threshold value and mark
+  all pages below the trust threshold as
+  spam
+        Simple Model: Trust Propagation
+
+• Set trust of each trusted page to 1
+• Suppose trust of page p is tp
+  – Page p has a set of out-links op
+• For each qop, p confers the trust to q
+  –  tp /|op|    for 0 < < 1
+• Trust is additive
+  – Trust of p is the sum of the trust conferred
+    on p by all its in-linked pages
+• Note similarity to Topic-Specific PageRank
+  – Within a scaling factor, TrustRank = PageRank
+    with trusted pages as teleport set
+                Why is it a good idea?
+
+• Trust attenuation:
+  – The degree of trust conferred by a trusted page
+    decreases with the distance in the graph
+
+• Trust splitting:
+  – The larger the number of out-links from a page, the
+    less scrutiny the page author gives each out-link
+  – Trust is split across out-links
+                  Picking the Seed Set
+
+• Two conflicting considerations:
+  – Human has to inspect each seed page, so seed
+    set must be as small as possible
+
+  – Must ensure every good page gets adequate
+    trust rank, so need make all good pages
+    reachable from seed set by short paths
+         Approaches to Picking Seed Set
+
+• Suppose we want to pick a seed set of k pages
+• How to do that?
+• (1) PageRank:
+  – Pick the top k pages by PageRank
+  – Theory is that you can’t get a bad page’s rank really
+    high
+• (2) Use trusted domains whose membership
+  is controlled, like .edu, .mil, .gov
+                      Spam Mass
+
+• In the TrustRank model, we start with good
+  pages and propagate trust
+
+• Complementary view:
+  What fraction of a page’s PageRank comes from
+  spam pages?
+
+• In practice, we don’t know all        Trusted
+                                          set
+  the spam pages, so we need
+  to estimate
+                                       Web
+                    Spam Mass Estimation
+ Solution 2:
+• 𝒓𝒑 = PageRank of page p
+   𝒑 = PageRank of p with teleport into
+• 𝒓+
+  trusted pages only
+
+• Then: What fraction of a page’s PageRank comes from
+  spam pages?
+
+      𝒓−
+       𝒑 = 𝒓 𝒑 − 𝒓 +
+                   𝒑                            Trusted
+                                                  set
+                             −
+                            𝒓𝒑
+• Spam mass of p =
+                            𝒓𝒑
+   – Pages with high spam mass are spam.
+                                              Web
+
